@@ -1,16 +1,45 @@
 /**
 * LINE APIをGASから呼び出すクラス
 */
-const LINE = (function () {
-  const LINE_API_URL = "https://api.line.me/v2/bot/message/reply";
-
+class LINE {
   /**
   * コンストラクタ
   * @param {string} apiToken - LINEのAPIトークン
   */
-  const LINE = function (apiToken) {
-    this.apiToken = apiToken;
+  constructor(apiToken) {
+    const _apiToken = apiToken;
+
+    Object.defineProperties(this, {
+      apiToken: {
+        get: function () {
+          return _apiToken;
+        }
+      },
+      apiUrl: {
+        get: function () {
+          return "https://api.line.me/v2/bot/message/reply";
+        }
+      },
+    });
   };
+
+  /**
+  * LINEにリクエストを送信する
+  * @param {object} param - パラメーター
+  * @return {ApiResponse} APIの応答
+  */
+  postJsonRequest(param) {
+    //HTTPSのPOST時のオプションパラメータを設定する
+    const options = {
+      'payload': JSON.stringify(param),
+      'myamethod': 'POST',
+      'headers': { "Authorization": "Bearer " + this.apiToken },
+      'contentType': 'application/json'
+    };
+
+    //LINE Messaging APIにリクエスト
+    return UrlFetchApp.fetch(this.apiUrl, options);
+  }
 
   /**
   * LINEに文字列メッセージを送信する
@@ -18,7 +47,7 @@ const LINE = (function () {
   * @param {string} message - LINEに送信する文字列
   * @return {ApiResponse} APIの応答
   */
-  LINE.prototype.postTextMessage = function (replyToken, message) {
+  postTextMessage(replyToken, message) {
     //APIリクエスト時にセットするペイロード値を設定する
     const payload = {
       'replyToken': replyToken, // 応答用トークン
@@ -28,16 +57,8 @@ const LINE = (function () {
       }]
     };
 
-    //HTTPSのPOST時のオプションパラメータを設定する
-    const options = {
-      'payload': JSON.stringify(payload),
-      'myamethod': 'POST',
-      'headers': { "Authorization": "Bearer " + this.apiToken },
-      'contentType': 'application/json'
-    };
-
-    //LINE Messaging APIにリクエスト
-    return UrlFetchApp.fetch(LINE_API_URL, options);
+    // LINEにJSONデータをPOSTする
+    return this.postJsonRequest(payload);
   };
 
   /**
@@ -46,7 +67,7 @@ const LINE = (function () {
   * @param {string} imageUrl - LINEに送信する画像
   * @return {ApiResponse} APIの応答
   */
-  LINE.prototype.postImageMesssage = function (replyToken, imageUrl) {
+  postImageMesssage(replyToken, imageUrl) {
     //APIリクエスト時にセットするペイロード値を設定する
     const payload = {
       'replyToken': replyToken, // 応答用トークン
@@ -57,17 +78,7 @@ const LINE = (function () {
       }]
     };
 
-    //HTTPSのPOST時のオプションパラメータを設定する
-    const options = {
-      'payload': JSON.stringify(payload),
-      'myamethod': 'POST',
-      'headers': { "Authorization": "Bearer " + this.apiToken },
-      'contentType': 'application/json'
-    };
-
-    //LINE Messaging APIにリクエスト
-    return UrlFetchApp.fetch(LINE_API_URL, options);
+    // LINEにJSONデータをPOSTする
+    return this.postJsonRequest(payload);
   };
-
-  return LINE;
-})();
+};

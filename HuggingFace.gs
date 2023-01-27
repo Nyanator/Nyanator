@@ -1,14 +1,22 @@
 /**
 * Hugging Face APIをGASから呼び出すクラス
 */
-const HuggingFace = (function () {
+class HuggingFace {
 
   /**
   * コンストラクタ
   * @param {string} apiUrl - Hugging Face APIのURL
   */
-  const HuggingFace = function (apiUrl) {
-    this.apiUrl = apiUrl;
+  constructor(apiUrl) {
+    const _apiUrl = apiUrl;
+
+    Object.defineProperties(this, {
+      apiUrl: {
+        get: function () {
+          return _apiUrl;
+        }
+      },
+    });
   };
 
   /**
@@ -16,7 +24,7 @@ const HuggingFace = (function () {
   * @param {string} data - POSTするdata
   * @return {ApiResponse} APIの応答
   */
-  HuggingFace.prototype.postJsonData = function (data) {
+  postJsonData(data) {
     //APIリクエスト時にセットするペイロード値を設定する
     const payload = {
       'data': [
@@ -34,6 +42,4 @@ const HuggingFace = (function () {
     // Hugging Face APIへリクエスト
     return UrlFetchApp.fetch(this.apiUrl, options);
   };
-
-  return HuggingFace;
-})();
+};
