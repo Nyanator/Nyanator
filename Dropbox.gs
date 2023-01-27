@@ -24,7 +24,7 @@ class Dropbox {
       },
     });
 
-    //　リフレッシュトークンからアクセストークンを取得する(dropboxはトークンの連続使用に制限がある)
+    //リフレッシュトークンからアクセストークンを取得する(dropboxはトークンの連続使用に制限がある)
     try {
       const response = this.initAccessToken(refreshToken, appKey, clientSecret);
       const json = GASUtil.parseResponse(response, 'refreshToken');
@@ -58,7 +58,7 @@ class Dropbox {
       options.payload = data;
     }
 
-    // Dropbox APIへリクエスト
+    //Dropbox APIへリクエスト
     return UrlFetchApp.fetch(uri, options);
   };
 
@@ -70,9 +70,9 @@ class Dropbox {
   * @return {ApiResponse} APIの応答
   */
   initAccessToken(refreshToken, appKey, clientSecret) {
-    // リフレッシュトークンと期間の短いアクセストークンを取得する
+    //リフレッシュトークンと期間の短いアクセストークンを取得する
     const uri = 'https://api.dropbox.com/oauth2/token';
-    // Base64へエンコード
+    //Base64へエンコード
     const encoded = Utilities.base64Encode(appKey + ":" + clientSecret);
 
     const param = {

@@ -20,4 +20,4 @@ class GASUtil {
     console.info("API " + apiName + " response code " + code);
     return response.getContentText();
   };
-}
+};

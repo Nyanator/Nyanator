@@ -5,14 +5,21 @@ class LINE {
   /**
   * コンストラクタ
   * @param {string} apiToken - LINEのAPIトークン
+  * @param {string} replyToken - LINEの返信用トークン
   */
-  constructor(apiToken) {
+  constructor(apiToken, replyToken) {
     const _apiToken = apiToken;
+    const _replyToken = replyToken;
 
     Object.defineProperties(this, {
       apiToken: {
         get: function () {
           return _apiToken;
+        }
+      },
+      replyToken: {
+        get: function () {
+          return _replyToken;
         }
       },
       apiUrl: {
@@ -43,14 +50,13 @@ class LINE {
 
   /**
   * LINEに文字列メッセージを送信する
-  * @param {string} replyToken - LINEの応答トークン
   * @param {string} message - LINEに送信する文字列
   * @return {ApiResponse} APIの応答
   */
-  postTextMessage(replyToken, message) {
+  postTextMessage(message) {
     //APIリクエスト時にセットするペイロード値を設定する
     const payload = {
-      'replyToken': replyToken, // 応答用トークン
+      'replyToken': this.replyToken, //応答用トークン
       'messages': [{
         "type": "text",
         "text": message,
@@ -63,14 +69,13 @@ class LINE {
 
   /**
   * LINEに文字列メッセージを送信する
-  * @param {string} replyToken - LINEの応答トークン
   * @param {string} imageUrl - LINEに送信する画像
   * @return {ApiResponse} APIの応答
   */
-  postImageMesssage(replyToken, imageUrl) {
+  postImageMesssage(imageUrl) {
     //APIリクエスト時にセットするペイロード値を設定する
     const payload = {
-      'replyToken': replyToken, // 応答用トークン
+      'replyToken': this.replyToken, //応答用トークン
       'messages': [{
         "type": "image",
         "originalContentUrl": imageUrl,
