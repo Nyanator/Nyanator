@@ -3,6 +3,7 @@
  * @param {object} e - ポストデータ等Webhookの情報
  */
 function doPost(e) {
+
   // WebHookで取得したJSONデータをオブジェクト化し、取得
   const eventData = JSON.parse(e.postData.contents).events[0];
   // 受信したJSONをログに出力 このスクリプトはGCPと連携しているのでログエクスプローラーにも出力される
@@ -11,9 +12,10 @@ function doPost(e) {
   //Hugging Face APIのURLをスクリプトプロパティから取得
   const huggingFace = new HuggingFace(PropertiesService.getScriptProperties().getProperty("huggingfaceurl"));
   const nyanator = new Nyanator();
+  const userMessage = eventData.message.text.replace("\n", " ");
 
   //HuggingFaceに画像生成のプロンプトを送信してBase64符号化された画像を得る
-  const base64EncodedData = nyanator.postPromptToHuggingFaceAPI(eventData.message.text, huggingFace);
+  const base64EncodedData = nyanator.postPromptToHuggingFaceAPI(userMessage, huggingFace);
 
   //Dropboxのアクセストークンは4時間で期限切れを起こすのでリフレッシュトークンから再取得
   const dropbox = new Dropbox(
@@ -22,7 +24,7 @@ function doPost(e) {
     PropertiesService.getScriptProperties().getProperty("dropboxclientsecret")
   );
   //Base64符号化された画像をDropboxに送信、画像の公開URLを取得
-  const generatedFileUrl = nyanator.putBase64JpegFileToDropBox(eventData.message.text, base64EncodedData, dropbox);
+  const generatedFileUrl = nyanator.putBase64JpegFileToDropBox(userMessage, base64EncodedData, dropbox);
 
   //LINE Messaging APIのアクセストークンをスクリプトプロパティから取得 
   const line = new LINE(PropertiesService.getScriptProperties().getProperty("linetoken"));

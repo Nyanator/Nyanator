@@ -1,12 +1,12 @@
 /**
 * Nyanator メインクラス
 */
-const Nyanator = (function () {
+class Nyanator {
 
   /**
   * コンストラクタ
   */
-  const Nyanator = function () {
+  constructor() {
   };
 
   /**
@@ -15,7 +15,7 @@ const Nyanator = (function () {
   * @param {string} huggingFace - HuggingFace
   * @return {string} Base64に符号化された生成画像データ
   */
-  Nyanator.prototype.postPromptToHuggingFaceAPI = function (prompt, huggingFace) {
+  postPromptToHuggingFaceAPI(prompt, huggingFace) {
     //Hugging Face APIにリクエストし、画像の生成結果を得る
     let base64Data = '';
     try {
@@ -24,15 +24,14 @@ const Nyanator = (function () {
       const code = response.getResponseCode();
       console.info("postPromptToHuggingFaceAPI response code " + code);
       if (code === 200) {
-        apiResult = response.getContentText();
+        const apiResult = response.getContentText();
 
         // data:image/jpeg;base64,データの書式で応答が来るが符号化するのに適さないため、データ部分だけを抜き出す
         base64Data = JSON.parse(apiResult).data[0].replace("data:image/jpeg;base64,", "");
       }
 
     } catch (e) {
-      // UrlFetchAppが一部例外を発生させるケースがあるが、その場合でもNyanatorとしては処理を続行させたい
-      console.error("postPromptToHuggingFaceAPI Exception message:" + e.message + "\nfileName:" + e.fileName + "\nlineNumber:" + e.lineNumber + "\nstack:" + e.stack);
+      GASUtil.putConsoleError(e);
     }
     return base64Data;
   };
@@ -43,7 +42,7 @@ const Nyanator = (function () {
   * @param {string} data - Base64符号化されたJpeg画像データ
   * @return {string} 書き出したJpgeファイルの公開URL
   */
-  Nyanator.prototype.putBase64JpegFileToDropBox = function (filePrefix, data, dropbox) {
+  putBase64JpegFileToDropBox(filePrefix, data, dropbox) {
     // 保存ファイル設定
     const fileName = filePrefix + '.jpeg';
     // Base64をデコードする
@@ -75,7 +74,7 @@ const Nyanator = (function () {
       const json = GASUtil.parseResponse(response, 'refreshToken');
       const data = JSON.parse(json);
       generatedFileUrl = data.links[0].url.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace('?dl=0', '');
-      console.log("generatedFileUrl" + generatedFileUrl);
+      console.log("generatedFileUrl " + generatedFileUrl);
 
     } catch (e) {
       GASUtil.putConsoleError(e);
@@ -84,6 +83,4 @@ const Nyanator = (function () {
     return generatedFileUrl;
 
   };
-
-  return Nyanator;
-})();
+};

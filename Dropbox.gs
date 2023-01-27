@@ -1,10 +1,7 @@
 /**
 * Dropbox APIをGASから呼び出すクラス
 */
-const Dropbox = (function () {
-
-  const DROPBOX_CONTENT_URL = "https://content.dropboxapi.com/2/";
-  const DROPBOX_API_URL = "https://api.dropboxapi.com/2/";
+class Dropbox {
 
   /**
   * コンストラクタ
@@ -12,7 +9,20 @@ const Dropbox = (function () {
   * @param {string} appKey - アプリケーションkey
   * @param {string} clientSecret - クライントシークレットkey
   */
-  const Dropbox = function (refreshToken, appKey, clientSecret) {
+  constructor(refreshToken, appKey, clientSecret) {
+
+    Object.defineProperties(this, {
+      dropboxContentUrl: {
+        get: function () {
+          return "https://content.dropboxapi.com/2/";
+        }
+      },
+      dropboxApiUrl: {
+        get: function () {
+          return "https://api.dropboxapi.com/2/";
+        }
+      },
+    });
 
     //　リフレッシュトークンからアクセストークンを取得する(dropboxはトークンの連続使用に制限がある)
     try {
@@ -33,7 +43,7 @@ const Dropbox = (function () {
   * @param {string} url - url
   * @return {ApiResponse} APIの応答
   */
-  Dropbox.prototype.postRequest = function (rest, param, data, url) {
+  postRequest(rest, param, data, url) {
     const uri = url + rest;
     const options = {
       method: 'post',
@@ -59,7 +69,7 @@ const Dropbox = (function () {
   * @param {string} clientSecret - クライントシークレットkey
   * @return {ApiResponse} APIの応答
   */
-  Dropbox.prototype.initAccessToken = function (refreshToken, appKey, clientSecret) {
+  initAccessToken(refreshToken, appKey, clientSecret) {
     // リフレッシュトークンと期間の短いアクセストークンを取得する
     const uri = 'https://api.dropbox.com/oauth2/token';
     // Base64へエンコード
@@ -87,11 +97,11 @@ const Dropbox = (function () {
   * @param {string} paht - ダウンロードするファイルのパス
   * @return {ApiResponse} APIの応答
   */
-  Dropbox.prototype.download = function (path) {
+  download(path) {
     const param = {
       path: path
     };
-    return this.postRequest('files/download', param, null, DROPBOX_CONTENT_URL);
+    return this.postRequest('files/download', param, null, this.dropboxContentUrl);
   };
 
   /**
@@ -100,12 +110,12 @@ const Dropbox = (function () {
   * @param {Blob} data - アップロードするファイルのBlob
   * @return {ApiResponse} APIの応答
   */
-  Dropbox.prototype.upload = function (path, data) {
+  upload(path, data) {
     const param = {
       path: path,
       mode: 'overwrite'
     };
-    return this.postRequest('files/upload', param, data, DROPBOX_CONTENT_URL);
+    return this.postRequest('files/upload', param, data, this.dropboxContentUrl);
   };
 
   /**
@@ -113,12 +123,12 @@ const Dropbox = (function () {
   * @param {string} path - アップロードするファイルのパス
   * @return {ApiResponse} APIの応答
   */
-  Dropbox.prototype.create_shared_link_settings = function (path) {
+  create_shared_link_settings(path) {
     const param = {
       path: path,
     };
 
-    const uri = DROPBOX_API_URL + 'sharing/create_shared_link_with_settings';
+    const uri = this.dropboxApiUrl + 'sharing/create_shared_link_with_settings';
     const options = {
       method: 'post',
       headers: {
@@ -136,12 +146,12 @@ const Dropbox = (function () {
   * @param {string} path - アップロードするファイルのパス
   * @return {ApiResponse} APIの応答
   */
-  Dropbox.prototype.list_shared_links = function (path) {
+  list_shared_links(path) {
     const param = {
       path: path,
     };
 
-    const uri = DROPBOX_API_URL + 'sharing/list_shared_links';
+    const uri = this.dropboxApiUrl + 'sharing/list_shared_links';
     const options = {
       method: 'post',
       headers: {
@@ -155,5 +165,4 @@ const Dropbox = (function () {
     return UrlFetchApp.fetch(uri, options);
   };
 
-  return Dropbox;
-})();
+};
