@@ -33,7 +33,7 @@ class Nyanator {
 
     switch (userMessage) {
       case NyanatroMode.SUMMARIZE.description:
-        resultMessage = "要約だね。短くしてほしい文章を投稿してみて。";
+        resultMessage = "要約だね。短くしてほしい文章を投げかけてみて。";
         this.mode = NyanatroMode.SUMMARIZE.description;
         break;
       case NyanatroMode.TEXT_TO_IMAGE.description:
@@ -41,11 +41,11 @@ class Nyanator {
         this.mode = NyanatroMode.TEXT_TO_IMAGE.description;
         break;
       case NyanatroMode.JP_TRANSLATION.description:
-        resultMessage = "和訳って面白いよね。日本語にしてほしい文章を投稿してみて。";
+        resultMessage = "和訳って面白いよね。日本語にしてほしい文章を投げかけてみて。";
         this.mode = NyanatroMode.JP_TRANSLATION.description;
         break;
       case NyanatroMode.EN_TRANSLATION.description:
-        resultMessage = "英訳大好き。英語にしてほしい文章を投稿してみて。";
+        resultMessage = "英訳大好き。英語にしてほしい文章を投げかけてみて。";
         this.mode = NyanatroMode.EN_TRANSLATION.description;
         break;
       default:
