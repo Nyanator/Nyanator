@@ -9,6 +9,19 @@ const NyanatroMode = Object.freeze({
   EN_TRANSLATION: Symbol('英訳'),
 });
 
+/** 
+ * Nyanatorのメッセージテーブルを表すenum
+ * @enum {Symbol} 
+ */
+const NyanatroMessage = Object.freeze({
+  SUMMARIZE: Symbol('要約だね。\n短くしたい文章を投げかけてみて。'),
+  TEXT_TO_IMAGE: Symbol('お絵かきして欲しいんだね。\nお題は？'),
+  JP_TRANSLATION: Symbol('和訳って面白いよね。\n日本語にしたい文章を投げかけてみて。'),
+  EN_TRANSLATION: Symbol('英訳大好き。\n英語にしたい文章を投げかけてみて。'),
+  BUSY: Symbol('ぐるぐる～ってしてるみたい。\nもう少しだけ待ってね。'),
+  NSFW_FILTERD: Symbol('ゴメンね。上手く描けないよ。。。\nもしかしてエッチな言葉じゃない？')
+});
+
 /**
 * Nyanator メインクラス
 */
@@ -23,6 +36,19 @@ class Nyanator {
   };
 
   /**
+  * Nyanatorに対してロックを掛ける
+  * @param {lock} lock - ロックオブジェクト
+  * @return {booleaan} ロックの成否
+  */
+  tryLock(lock) {
+    if (!lock.tryLock(500)) {
+      this.errorDescription = NyanatroMessage.BUSY.description;
+      return false;
+    }
+    return true;
+  };
+
+  /**
   * ユーザーからのメッセージを確認して応答すべきか判断
   * @param {string} userId - ユーザーId
   * @param {string} userMessage - ユーザーの投稿メッセージ
@@ -33,19 +59,19 @@ class Nyanator {
 
     switch (userMessage) {
       case NyanatroMode.SUMMARIZE.description:
-        resultMessage = "要約だね。短くしてほしい文章を投げかけてみて。";
+        resultMessage = NyanatroMessage.SUMMARIZE.description;
         this.mode = NyanatroMode.SUMMARIZE.description;
         break;
       case NyanatroMode.TEXT_TO_IMAGE.description:
-        resultMessage = "お絵かきして欲しいんだね。お題は？";
+        resultMessage = NyanatroMessage.TEXT_TO_IMAGE.description;
         this.mode = NyanatroMode.TEXT_TO_IMAGE.description;
         break;
       case NyanatroMode.JP_TRANSLATION.description:
-        resultMessage = "和訳って面白いよね。日本語にしてほしい文章を投げかけてみて。";
+        resultMessage = NyanatroMessage.JP_TRANSLATION.description;
         this.mode = NyanatroMode.JP_TRANSLATION.description;
         break;
       case NyanatroMode.EN_TRANSLATION.description:
-        resultMessage = "英訳大好き。英語にしてほしい文章を投げかけてみて。";
+        resultMessage = NyanatroMessage.EN_TRANSLATION.description;
         this.mode = NyanatroMode.EN_TRANSLATION.description;
         break;
       default:
@@ -90,7 +116,7 @@ class Nyanator {
     }
 
     if (!resultText) {
-      this.errorDescription = "今ぐるぐる～ってしてるみたい。もう少しだけ待ってね。";
+      this.errorDescription = NyanatroMessage.BUSY.description;
     }
 
     return resultText;
@@ -122,7 +148,7 @@ class Nyanator {
     }
 
     if (!base64Data || base64Data == GASUtil.base64BlackedoutImage()) {
-      this.errorDescription = "ゴメンね。上手く描けないよ。。。もしかしてエッチな言葉じゃない？";
+      this.errorDescription = NyanatroMessage.NSFW_FILTERD.description;
     }
 
     return base64Data;
@@ -176,7 +202,7 @@ class Nyanator {
     }
 
     if (!generatedFileUrl) {
-      this.errorDescription = "今ぐるぐる～ってしてるみたい。もう少しだけ待ってね。";
+      this.errorDescription = NyanatroMessage.BUSY.description;
     }
 
     return generatedFileUrl;
@@ -208,7 +234,7 @@ class Nyanator {
     }
 
     if (!resultText) {
-      this.errorDescription = "今ぐるぐる～ってしてるみたい。もう少しだけ待ってね。";
+      this.errorDescription = NyanatroMessage.BUSY.description;
     }
 
     return resultText;
@@ -239,7 +265,7 @@ class Nyanator {
     }
 
     if (!resultText) {
-      this.errorDescription = "今ぐるぐる～ってしてるみたい。もう少しだけ待ってね。";
+      this.errorDescription = NyanatroMessage.BUSY.description;
     }
 
     return resultText;
