@@ -7,6 +7,7 @@ const NyanatroMode = Object.freeze({
   TEXT_TO_IMAGE: Symbol('画像'),
   JP_TRANSLATION: Symbol('和訳'),
   EN_TRANSLATION: Symbol('英訳'),
+  CHATBOT: Symbol('会話'),
 });
 
 /** 
@@ -18,6 +19,7 @@ const NyanatroMessage = Object.freeze({
   TEXT_TO_IMAGE: Symbol('お絵かきして欲しいんだね。\nお題は？'),
   JP_TRANSLATION: Symbol('和訳って面白いよね。\n日本語にしたい文章を投げかけてみて。'),
   EN_TRANSLATION: Symbol('英訳大好き。\n英語にしたい文章を投げかけてみて。'),
+  CHATBOT: Symbol('僕が話し相手になってあげる。'),
   BUSY: Symbol('ぐるぐる～ってしてるみたい。\nもう少しだけ待ってね。'),
   NSFW_FILTERD: Symbol('ゴメンね。上手く描けないよ。。。\nもしかしてエッチな言葉じゃない？')
 });
@@ -73,6 +75,10 @@ class Nyanator {
       case NyanatroMode.EN_TRANSLATION.description:
         resultMessage = NyanatroMessage.EN_TRANSLATION.description;
         this.mode = NyanatroMode.EN_TRANSLATION.description;
+        break;
+      case NyanatroMode.CHATBOT.description:
+        resultMessage = NyanatroMessage.CHATBOT.description;
+        this.mode = NyanatroMode.CHATBOT.description;
         break;
       default:
         break;
@@ -210,7 +216,7 @@ class Nyanator {
   };
 
   /**
-  * 和訳対象の文字列ををHuggingFaceで公開したAPIに送信
+  * 和訳対象の文字列をHuggingFaceで公開したAPIに送信
   * @param {string} translationText - 和訳したい文字列
   * @param {HuggingFace} huggingFace - HuggingFace
   * @return {string} 和訳結果の文字列
@@ -241,7 +247,7 @@ class Nyanator {
   };
 
   /**
-  * 英訳対象の文字列ををHuggingFaceで公開したAPIに送信
+  * 英訳対象の文字列をHuggingFaceで公開したAPIに送信
   * @param {string} translationText - 英訳したい文字列
   * @param {HuggingFace} huggingFace - HuggingFace
   * @return {string} 英訳結果の文字列
@@ -254,6 +260,37 @@ class Nyanator {
       const response = huggingFace.postJsonData(translationText);
       const code = response.getResponseCode();
       console.info("postEnTranslationTextToHuggingFaceAPI response code " + code);
+      if (code === 200) {
+        const apiResult = response.getContentText();
+        resultText = JSON.parse(apiResult).data[0];
+      }
+
+    } catch (e) {
+      GASUtil.putConsoleError(e);
+
+    }
+
+    if (!resultText) {
+      this.errorDescription = NyanatroMessage.BUSY.description;
+    }
+
+    return resultText;
+  };
+
+  /**
+  * 会話の内容をHuggingFaceで公開したAPIに送信
+  * @param {string} talkText - 会話の内容文字列
+  * @param {HuggingFace} huggingFace - HuggingFace
+  * @return {string} 会話の返答文字列
+  */
+  postTalkTextToHuggingFaceAPI(talkText, huggingFace) {
+    //Hugging Face APIにリクエストし、会話の応答を得る
+    let resultText = '';
+    try {
+      console.info("postTalkTextToHuggingFaceAPI talkText " + talkText);
+      const response = huggingFace.postJsonData(talkText);
+      const code = response.getResponseCode();
+      console.info("postTalkTextToHuggingFaceAPI response code " + code);
       if (code === 200) {
         const apiResult = response.getContentText();
         resultText = JSON.parse(apiResult).data[0];
