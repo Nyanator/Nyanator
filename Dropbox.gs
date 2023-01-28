@@ -24,7 +24,7 @@ class Dropbox {
       },
     });
 
-    //　リフレッシュトークンからアクセストークンを取得する(dropboxはトークンの連続使用に制限がある)
+    //リフレッシュトークンからアクセストークンを取得(dropboxはトークンの連続使用に制限がある)
     try {
       const response = this.initAccessToken(refreshToken, appKey, clientSecret);
       const json = GASUtil.parseResponse(response, 'refreshToken');
@@ -39,7 +39,7 @@ class Dropbox {
   * ポストリクエストを投げる
   * @param {string} rest - REST Uri
   * @param {object} param - パラメーター
-  * @param {Blob} data - ポストするデータ
+  * @param {Blob} data - ポストしたいデータ
   * @param {string} url - url
   * @return {ApiResponse} APIの応答
   */
@@ -58,7 +58,7 @@ class Dropbox {
       options.payload = data;
     }
 
-    // Dropbox APIへリクエスト
+    //Dropbox APIへリクエスト
     return UrlFetchApp.fetch(uri, options);
   };
 
@@ -70,9 +70,9 @@ class Dropbox {
   * @return {ApiResponse} APIの応答
   */
   initAccessToken(refreshToken, appKey, clientSecret) {
-    // リフレッシュトークンと期間の短いアクセストークンを取得する
+    //リフレッシュトークンと期間の短いアクセストークンを取得
     const uri = 'https://api.dropbox.com/oauth2/token';
-    // Base64へエンコード
+    //Base64へエンコード
     const encoded = Utilities.base64Encode(appKey + ":" + clientSecret);
 
     const param = {
@@ -94,7 +94,7 @@ class Dropbox {
 
   /**
   * ファイルダウンロード
-  * @param {string} paht - ダウンロードするファイルのパス
+  * @param {string} paht - ダウンロードしたいファイルのパス
   * @return {ApiResponse} APIの応答
   */
   download(path) {
@@ -106,8 +106,8 @@ class Dropbox {
 
   /**
   * ファイルアップロード
-  * @param {string} path - アップロードするファイルのパス
-  * @param {Blob} data - アップロードするファイルのBlob
+  * @param {string} path - アップロードしたいファイルのパス
+  * @param {Blob} data - アップロードしたいファイルのBlob
   * @return {ApiResponse} APIの応答
   */
   upload(path, data) {
@@ -120,7 +120,7 @@ class Dropbox {
 
   /**
   * ファイルの共有設定を変更
-  * @param {string} path - アップロードするファイルのパス
+  * @param {string} path - アップロードしたいファイルのパス
   * @return {ApiResponse} APIの応答
   */
   create_shared_link_settings(path) {
@@ -143,7 +143,7 @@ class Dropbox {
 
   /**
   * 共有設定されたファイルのリンクを取得
-  * @param {string} path - アップロードするファイルのパス
+  * @param {string} path - アップロードしたいファイルのパス
   * @return {ApiResponse} APIの応答
   */
   list_shared_links(path) {
