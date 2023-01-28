@@ -21,18 +21,18 @@ class HuggingFace {
 
   /**
   * HuggingFace APIにPOSTでJSONデータを送る
-  * @param {string} data - POSTするdata
+  * @param {string} data - POSTしたいdata
   * @return {ApiResponse} APIの応答
   */
   postJsonData(data) {
-    //APIリクエスト時にセットするペイロード値を設定する
+    //APIリクエスト時にセットするペイロード値を設定
     const payload = {
       'data': [
         data
       ]
     };
 
-    //HTTPSのPOST時のオプションパラメータを設定する
+    //HTTPSのPOST時のオプションパラメータを設定
     const options = {
       'payload': JSON.stringify(payload),
       'myamethod': 'POST',

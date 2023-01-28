@@ -31,12 +31,12 @@ class LINE {
   };
 
   /**
-  * LINEにリクエストを送信する
+  * LINEにJSONリクエストを送信
   * @param {object} param - パラメーター
   * @return {ApiResponse} APIの応答
   */
   postJsonRequest(param) {
-    //HTTPSのPOST時のオプションパラメータを設定する
+    //HTTPSのPOST時のオプションパラメータを設定
     const options = {
       'payload': JSON.stringify(param),
       'myamethod': 'POST',
@@ -49,12 +49,12 @@ class LINE {
   }
 
   /**
-  * LINEに文字列メッセージを送信する
-  * @param {string} message - LINEに送信する文字列
+  * LINEに文字列メッセージを送信
+  * @param {string} message - LINEに送信したい文字列
   * @return {ApiResponse} APIの応答
   */
   postTextMessage(message) {
-    //APIリクエスト時にセットするペイロード値を設定する
+    //APIリクエスト時にセットするペイロード値を設定
     const payload = {
       'replyToken': this.replyToken, //応答用トークン
       'messages': [{
@@ -63,17 +63,17 @@ class LINE {
       }]
     };
 
-    // LINEにJSONデータをPOSTする
+    // LINEにJSONデータをPOST
     return this.postJsonRequest(payload);
   };
 
   /**
-  * LINEに文字列メッセージを送信する
-  * @param {string} imageUrl - LINEに送信する画像
+  * LINEに文字列メッセージを送信
+  * @param {string} imageUrl - LINEに送信したい画像
   * @return {ApiResponse} APIの応答
   */
   postImageMesssage(imageUrl) {
-    //APIリクエスト時にセットするペイロード値を設定する
+    //APIリクエスト時にセットするペイロード値を設定
     const payload = {
       'replyToken': this.replyToken, //応答用トークン
       'messages': [{
@@ -83,7 +83,7 @@ class LINE {
       }]
     };
 
-    // LINEにJSONデータをPOSTする
+    // LINEにJSONデータをPOST
     return this.postJsonRequest(payload);
   };
 };
