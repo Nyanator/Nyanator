@@ -102,6 +102,19 @@ function doPost(e) {
 
         line.postTextMessage(enTranslatedText);
         break;
+      case NyanatroMode.CHATBOT.description:              //会話
+        //Hugging Face CHATBOT APIのURLをスクリプトプロパティから取得
+        const chatbotSpace = new HuggingFace(PropertiesService.getScriptProperties().getProperty("chatboturl"));
+
+        // Hugging Faceに会話したい文章を送信
+        const replyTalkText = nyanator.postTalkTextToHuggingFaceAPI(userMessage, chatbotSpace);
+        if (nyanator.errorDescription) {
+          line.postTextMessage(nyanator.errorDescription);
+          break;
+        }
+
+        line.postTextMessage(replyTalkText);
+        break;
       default:
         break;
     }
