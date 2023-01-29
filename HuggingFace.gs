@@ -39,6 +39,7 @@ class HuggingFace {
       'contentType': 'application/json'
     };
 
+    console.info("apiUrl " + this.apiUrl);
     // Hugging Face APIへリクエスト
     return UrlFetchApp.fetch(this.apiUrl, options);
   };

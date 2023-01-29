@@ -36,6 +36,10 @@ class LINE {
   * @return {ApiResponse} APIの応答
   */
   postJsonRequest(param) {
+    if (!this.replyToken) {
+      return;
+    }
+
     //HTTPSのPOST時のオプションパラメータを設定
     const options = {
       'payload': JSON.stringify(param),
