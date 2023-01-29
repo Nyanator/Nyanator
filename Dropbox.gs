@@ -59,6 +59,7 @@ class Dropbox {
     }
 
     //Dropbox APIへリクエスト
+    console.info("apiUrl " + uri);
     return UrlFetchApp.fetch(uri, options);
   };
 
@@ -89,6 +90,7 @@ class Dropbox {
     options.payload = param;
 
     // Dropbox APIへリクエスト
+    console.info("apiUrl " + uri);
     return UrlFetchApp.fetch(uri, options);
   };
 
@@ -138,6 +140,7 @@ class Dropbox {
     options.contentType = 'application/json';
     options.payload = JSON.stringify(param);
 
+    console.info("apiUrl " + uri);
     return UrlFetchApp.fetch(uri, options);
   };
 
@@ -162,6 +165,7 @@ class Dropbox {
     options.payload = JSON.stringify(param);
 
     // Dropbox APIへリクエスト
+    console.info("apiUrl " + uri);
     return UrlFetchApp.fetch(uri, options);
   };
 
