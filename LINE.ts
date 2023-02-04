@@ -1,36 +1,37 @@
 /**
-* LINE Messaging APIをGASから呼び出すクラス
-*/
+ * LINE Messaging APIをGASから呼び出すクラス
+ */
 class LINE {
   // TypeScriptではprivateフィールドが書ける
   // これはGASがES2022で動作していないから
-  private apiToken   = '';
-  private replyToken = '';
-  private REPLY_URL  = 'https://api.line.me/v2/bot/message/reply';
+  private apiToken = "";
+  private replyToken = "";
+  private readonly REPLY_URL = "https://api.line.me/v2/bot/message/reply";
   /**
-  * コンストラクタ
-  * @param {string} apiToken   - APIトークン
-  * @param {string} replyToken - 返信用トークン
-  */
-  constructor(apiToken : string, replyToken : string) {
-    this.apiToken   = apiToken;
+   * コンストラクタ
+   * @param apiToken   - APIトークン
+   * @param replyToken - 返信用トークン
+   */
+  constructor(apiToken: string, replyToken: string) {
+    this.apiToken = apiToken;
     this.replyToken = replyToken;
-    Object.freeze(this);
   }
 
   /**
-  * LINEに文字列メッセージを送信
-  * @param {string} message - LINEに送信したい文字列
-  * @return {HTTPResponse} APIの応答
-  */
-  postTextMessage(message : string) {
+   * LINEに文字列メッセージを送信
+   * @param message - LINEに送信したい文字列
+   * @return APIの応答
+   */
+  postTextMessage(message: string): GoogleAppsScript.URL_Fetch.HTTPResponse | undefined {
     //APIリクエスト時にセットするペイロード値を設定
     const payload = {
       replyToken: this.replyToken, //応答用トークン
-      messages: [{
-        type: 'text',
-        text: message,
-      }]
+      messages: [
+        {
+          type: "text",
+          text: message,
+        },
+      ],
     };
 
     // LINEにJSONデータをPOST
@@ -38,19 +39,21 @@ class LINE {
   }
 
   /**
-  * LINEに画像メッセージを送信
-  * @param {string} imageUrl - LINEに送信したい画像
-  * @return {HTTPResponse} APIの応答
-  */
-  postImageMesssage(imageUrl :string) {
+   * LINEに画像メッセージを送信
+   * @param imageUrl - LINEに送信したい画像
+   * @return APIの応答
+   */
+  postImageMessage(imageUrl: string): GoogleAppsScript.URL_Fetch.HTTPResponse | undefined {
     //APIリクエスト時にセットするペイロード値を設定
     const payload = {
       replyToken: this.replyToken, //応答用トークン
-      messages: [{
-        type: 'image',
-        originalContentUrl: imageUrl,
-        previewImageUrl: imageUrl
-      }]
+      messages: [
+        {
+          type: "image",
+          originalContentUrl: imageUrl,
+          previewImageUrl: imageUrl,
+        },
+      ],
     };
 
     // LINEにJSONデータをPOST
@@ -58,11 +61,13 @@ class LINE {
   }
 
   /**
-  * LINEにJSONリクエストを送信
-  * @param  {Payload} param - パラメーター
-  * @return {HTTPResponse} APIの応答
-  */
-  postJsonRequest(param : GoogleAppsScript.URL_Fetch.Payload) {
+   * LINEにJSONリクエストを送信
+   * @param param - パラメーター
+   * @return APIの応答
+   */
+  postJsonRequest(
+    param: GoogleAppsScript.URL_Fetch.Payload
+  ): GoogleAppsScript.URL_Fetch.HTTPResponse | undefined {
     if (!this.replyToken) {
       return;
     }
@@ -72,7 +77,7 @@ class LINE {
       payload: JSON.stringify(param),
       method: HttpMethod.POST,
       headers: { Authorization: Authorization.MakeBearer(this.apiToken) },
-      contentType: MediaType.APPLICATION_JSON
+      contentType: MediaType.APPLICATION_JSON,
     };
 
     //LINE Messaging APIにリクエスト

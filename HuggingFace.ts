@@ -1,36 +1,35 @@
 /**
-* Hugging Face APIをGASから呼び出すクラス
-*/
+ * Hugging Face APIをGASから呼び出すクラス
+ */
 class HuggingFace {
   // TypeScriptではprivateフィールドが書ける
   // これはGASがES2022で動作していないから
-  private apiUrl = '';
+  private apiUrl = "";
 
   /**
-  * コンストラクタ
-  * @param {string} apiUrl - APIのURL
-  */
-  constructor(apiUrl : string) {
-    this.apiUrl   = apiUrl; 
-    Object.freeze(this);
+   * コンストラクタ
+   * @param apiUrl - APIのURL
+   */
+  constructor(apiUrl: string) {
+    this.apiUrl = apiUrl;
   }
 
   /**
-  * HuggingFace APIにPOSTでJSONデータを送る
-  * @param  {string} data - POSTしたいdata
-  * @return {HTTPResponse} APIの応答
-  */
-  postJsonData(data : string) {
+   * HuggingFace APIにPOSTでJSONデータを送る
+   * @param data - POSTしたいdata
+   * @return APIの応答
+   */
+  postJsonData(data: string): GoogleAppsScript.URL_Fetch.HTTPResponse {
     //APIリクエスト時にセットするペイロード値を設定
     const payload = {
-      data: [data]
+      data: [data],
     };
 
     //HTTPSのPOST時のオプションパラメータを設定
     const options = {
       payload: JSON.stringify(payload),
       method: HttpMethod.POST,
-      contentType: MediaType.APPLICATION_JSON
+      contentType: MediaType.APPLICATION_JSON,
     };
 
     console.info(`apiUrl ${this.apiUrl}`);
