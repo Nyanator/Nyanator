@@ -22,7 +22,9 @@ class LINE {
    * @param message - LINEに送信したい文字列
    * @return APIの応答
    */
-  postTextMessage(message: string): GoogleAppsScript.URL_Fetch.HTTPResponse | undefined {
+  postTextMessage(
+    message: string
+  ): GoogleAppsScript.URL_Fetch.HTTPResponse | undefined {
     //APIリクエスト時にセットするペイロード値を設定
     const payload = {
       replyToken: this.replyToken, //応答用トークン
@@ -43,7 +45,9 @@ class LINE {
    * @param imageUrl - LINEに送信したい画像
    * @return APIの応答
    */
-  postImageMessage(imageUrl: string): GoogleAppsScript.URL_Fetch.HTTPResponse | undefined {
+  postImageMessage(
+    imageUrl: string
+  ): GoogleAppsScript.URL_Fetch.HTTPResponse | undefined {
     //APIリクエスト時にセットするペイロード値を設定
     const payload = {
       replyToken: this.replyToken, //応答用トークン

@@ -14,7 +14,7 @@ function doPost_Test_All() {
  * Nyanatorモード遷移のテスト
  */
 function doPost_Test_Transition() {
-  Object.keys(Nyanator.Mode).forEach((key : string) =>
+  Object.keys(Nyanator.Mode).forEach((key: string) =>
     doPost_Test_StartXXXX(Nyanator.Mode[key].mode, "testuser")
   );
 }
@@ -33,7 +33,7 @@ function doPost_Test_StartXXXX(
   const propertyKey = Nyanator.modePropertyKey(testUser);
   //実行前にモードを初期化する
   PropertiesService.getScriptProperties().setProperty(propertyKey, "");
-  const postData : LINEPostData = {
+  const postData: LINEPostData = {
     postData: {
       contents: JSON.stringify({
         events: [
@@ -45,7 +45,7 @@ function doPost_Test_StartXXXX(
         ],
       }),
     },
-  }
+  };
   doPost(postData);
 
   //完了後にモードをスクリプトプロパティから取得して想定した値と同じならテスト成功

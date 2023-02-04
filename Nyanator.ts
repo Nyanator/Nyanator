@@ -295,7 +295,9 @@ class Nyanator {
     try {
       const response = dropbox.list_shared_links(dropboxFileName);
       const json = GASUtil.parseResponse(response, "list_shared_links");
-      const dropboxAPI_list_shared_links_Ressponse = JSON.parse(json) as DropboxAPI_list_shared_links_Ressponse;
+      const dropboxAPI_list_shared_links_Ressponse = JSON.parse(
+        json
+      ) as DropboxAPI_list_shared_links_Ressponse;
 
       // 文字列置換でDropboxの公開URLに変換
       generatedFileUrl = dropboxAPI_list_shared_links_Ressponse.links[0].url
