@@ -12,7 +12,6 @@ class Dropbox {
      */
     constructor(refreshToken, appKey, clientSecret) {
         // TypeScriptではprivateフィールドが書ける
-        // これはGASがES2022で動作していないから
         this.CONTENT_URL = "https://content.dropboxapi.com/2/";
         this.API_URL = "https://api.dropboxapi.com/2/";
         this.OAUTH_URL = "https://api.dropbox.com/oauth2/token";

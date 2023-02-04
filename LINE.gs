@@ -11,7 +11,6 @@ class LINE {
      */
     constructor(apiToken, replyToken) {
         // TypeScriptではprivateフィールドが書ける
-        // これはGASがES2022で動作していないから
         this.apiToken = "";
         this.replyToken = "";
         this.REPLY_URL = "https://api.line.me/v2/bot/message/reply";
