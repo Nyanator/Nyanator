@@ -1,4 +1,4 @@
-// Compiled using undefined undefined (TypeScript 4.9.5)
+// Compiled using nyanator 1.0.0 (TypeScript 4.9.5)
 "use strict";
 /**
  * LINE Messaging APIのWebhook URLにPOSTされたリクエストに対する処理最初に実行される

@@ -1,4 +1,4 @@
-// Compiled using undefined undefined (TypeScript 4.9.5)
+// Compiled using nyanator 1.0.0 (TypeScript 4.9.5)
 "use strict";
 /**
 * Hugging Face APIをGASから呼び出すクラス
