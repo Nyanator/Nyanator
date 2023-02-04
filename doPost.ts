@@ -12,7 +12,6 @@ function doPost(e : any) {
   const userMessage : string = eventData.message.text;
   const userId      : string = eventData.source.userId;
   const replyTokne  : string = eventData.replyToken;
-
   // Nyanatorがユーザーに対して返信する
   const nyanator = new Nyanator();
   nyanator.reply(userMessage, userId, replyTokne);
