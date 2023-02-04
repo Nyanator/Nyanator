@@ -13,4 +13,4 @@ function doPost(e) {
   const nyanator = new Nyanator();
   nyanator.reply(eventData);
 
-};
+}

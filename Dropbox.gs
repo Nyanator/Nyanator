@@ -2,7 +2,6 @@
 * Dropbox APIをGASから呼び出すクラス
 */
 class Dropbox {
-
   /**
   * コンストラクタ
   * @param {string} refreshToken - リフレッシュトークン
@@ -10,71 +9,146 @@ class Dropbox {
   * @param {string} clientSecret - クライントシークレットkey
   */
   constructor(refreshToken, appKey, clientSecret) {
-
+    // GASが現状ES2022で動作しておらず他言語でいうところのprivateフィールドが簡潔な記述で実現できない
+    // getterしかないのでイミュータブルにできる
     Object.defineProperties(this, {
-      dropboxContentUrl: {
-        get: function () {
-          return "https://content.dropboxapi.com/2/";
-        }
-      },
-      dropboxApiUrl: {
-        get: function () {
-          return "https://api.dropboxapi.com/2/";
-        }
-      },
+      CONTENT_URL: { get() { return 'https://content.dropboxapi.com/2/'; } },
+      API_URL:     { get() { return 'https://api.dropboxapi.com/2/'; } },
+      OAUTH_URL:   { get() { return 'https://api.dropbox.com/oauth2/token'; } },
     });
 
+    let apiToken;
     //リフレッシュトークンからアクセストークンを取得(dropboxはトークンの連続使用に制限がある)
     try {
       const response = this.initAccessToken(refreshToken, appKey, clientSecret);
       const json = GASUtil.parseResponse(response, 'refreshToken');
       const data = JSON.parse(json);
-      this.apiToken = data.access_token;
+      apiToken = data.access_token;
     } catch (e) {
       GASUtil.putConsoleError(e);
     }
-  };
+
+    Object.defineProperties(this, {
+      apiToken:    { get() { return apiToken; } },
+    });
+  }
+
+  /**
+  * ファイルダウンロード
+  * @param {string} paht - ダウンロードしたいファイルのパス
+  * @return {HTTPResponse} APIの応答
+  */
+  download(path) {
+    const param = {
+      path: path
+    };
+    return this.postRequest('files/download', param, null, this.CONTENT_URL);
+  }
+
+  /**
+  * ファイルアップロード
+  * @param {string} path - アップロードしたいファイルのパス
+  * @param {Blob} data - アップロードしたいファイルのBlob
+  * @return {HTTPResponse} APIの応答
+  */
+  upload(path, data) {
+    const param = {
+      path: path,
+      mode: 'overwrite'
+    };
+    return this.postRequest('files/upload', param, data, this.CONTENT_URL);
+  }
+
+  /**
+  * ファイルの共有設定を変更
+  * @param {string} path - アップロードしたいファイルのパス
+  * @return {HTTPResponse} APIの応答
+  */
+  create_shared_link_settings(path) {
+    const param = {
+      path: path,
+    };
+
+    // Dropbox APIへJSONリクエスト
+    return this.postJsonRequest('sharing/create_shared_link_with_settings', param, this.API_URL);
+  }
+
+  /**
+  * 共有設定されたファイルのリンクを取得
+  * @param {string} path - アップロードしたいファイルのパス
+  * @return {HTTPResponse} APIの応答
+  */
+  list_shared_links(path) {
+    const param = {
+      path: path,
+    };
+
+    // Dropbox APIへJSONリクエスト
+    return this.postJsonRequest('sharing/list_shared_links', param, this.API_URL);
+  }
 
   /**
   * ポストリクエストを投げる
-  * @param {string} rest - REST Uri
+  * @param {string} path - Urlパス
   * @param {object} param - パラメーター
   * @param {Blob} data - ポストしたいデータ
   * @param {string} url - url
-  * @return {ApiResponse} APIの応答
+  * @return {HTTPResponse} APIの応答
   */
-  postRequest(rest, param, data, url) {
-    const uri = url + rest;
+  postRequest(path, param, data, url) {
+    const uri = url + path;
     const options = {
-      method: 'post',
+      method: HttpMethod.POST,
       headers: {
-        Authorization: 'Bearer ' + this.apiToken,
+        Authorization: Authorization.MakeBearer(this.apiToken),
         'Dropbox-API-Arg': JSON.stringify(param)
       }
     };
 
     if (data) {
-      options.contentType = 'application/octet-stream';
+      options.contentType = MediaType.APPLICATION_OCTET_STREAM;
       options.payload = data;
     }
 
     //Dropbox APIへリクエスト
-    console.info("apiUrl " + uri);
+    console.info(`apiUrl ${uri}`);
     return UrlFetchApp.fetch(uri, options);
-  };
+  }
+
+  /**
+  * ポストでJSONを投げる
+  * @param {string} path - Urlパス
+  * @param {object} param - パラメーター
+  * @param {string} url - url
+  * @return {HTTPResponse} APIの応答
+  */
+  postJsonRequest(path, param, url) {
+    const uri = url + path;
+    const options = {
+      method: HttpMethod.POST,
+      headers: {
+        Authorization: Authorization.MakeBearer(this.apiToken)
+      }
+    };
+    options.contentType = MediaType.APPLICATION_JSON;
+    options.payload = JSON.stringify(param);
+
+    //Dropbox APIへリクエスト
+    console.info(`apiUrl ${uri}`);
+    return UrlFetchApp.fetch(uri, options);
+  }
 
   /**
   * Dropboxのアクセストークンを再取得(Dropboxのアクセストークンは4時間しか連続使用できない)
   * @param {string} refreshToken - リフレッシュトークン
   * @param {string} appKey - アプリケーションkey
   * @param {string} clientSecret - クライントシークレットkey
-  * @return {ApiResponse} APIの応答
+  * @return {HTTPResponse} APIの応答
   */
   initAccessToken(refreshToken, appKey, clientSecret) {
     //リフレッシュトークンと期間の短いアクセストークンを取得
-    const uri = 'https://api.dropbox.com/oauth2/token';
     //Base64へエンコード
-    const encoded = Utilities.base64Encode(appKey + ":" + clientSecret);
+    const encoded = Utilities.base64Encode(`${appKey}:${clientSecret}`);
 
     const param = {
       grant_type: 'refresh_token',
@@ -82,91 +156,14 @@ class Dropbox {
     };
 
     const options = {
-      method: 'post',
+      method: HttpMethod.POST,
       headers: {
-        Authorization: 'Basic ' + encoded,
+        Authorization: Authorization.MakeBasic(encoded),
       },
     };
     options.payload = param;
 
     // Dropbox APIへリクエスト
-    console.info("apiUrl " + uri);
-    return UrlFetchApp.fetch(uri, options);
-  };
-
-  /**
-  * ファイルダウンロード
-  * @param {string} paht - ダウンロードしたいファイルのパス
-  * @return {ApiResponse} APIの応答
-  */
-  download(path) {
-    const param = {
-      path: path
-    };
-    return this.postRequest('files/download', param, null, this.dropboxContentUrl);
-  };
-
-  /**
-  * ファイルアップロード
-  * @param {string} path - アップロードしたいファイルのパス
-  * @param {Blob} data - アップロードしたいファイルのBlob
-  * @return {ApiResponse} APIの応答
-  */
-  upload(path, data) {
-    const param = {
-      path: path,
-      mode: 'overwrite'
-    };
-    return this.postRequest('files/upload', param, data, this.dropboxContentUrl);
-  };
-
-  /**
-  * ファイルの共有設定を変更
-  * @param {string} path - アップロードしたいファイルのパス
-  * @return {ApiResponse} APIの応答
-  */
-  create_shared_link_settings(path) {
-    const param = {
-      path: path,
-    };
-
-    const uri = this.dropboxApiUrl + 'sharing/create_shared_link_with_settings';
-    const options = {
-      method: 'post',
-      headers: {
-        Authorization: 'Bearer ' + this.apiToken,
-      }
-    };
-    options.contentType = 'application/json';
-    options.payload = JSON.stringify(param);
-
-    console.info("apiUrl " + uri);
-    return UrlFetchApp.fetch(uri, options);
-  };
-
-  /**
-  * 共有設定されたファイルのリンクを取得
-  * @param {string} path - アップロードしたいファイルのパス
-  * @return {ApiResponse} APIの応答
-  */
-  list_shared_links(path) {
-    const param = {
-      path: path,
-    };
-
-    const uri = this.dropboxApiUrl + 'sharing/list_shared_links';
-    const options = {
-      method: 'post',
-      headers: {
-        Authorization: 'Bearer ' + this.apiToken,
-      }
-    };
-    options.contentType = 'application/json';
-    options.payload = JSON.stringify(param);
-
-    // Dropbox APIへリクエスト
-    console.info("apiUrl " + uri);
-    return UrlFetchApp.fetch(uri, options);
-  };
-
-};
+    return UrlFetchApp.fetch(this.OAUTH_URL, options);
+  }
+}

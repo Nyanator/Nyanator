@@ -1,27 +1,40 @@
-/** 
- * Nyanatorのモードを表すテーブル。モード名。ユーザーに対する応答。HuggingFaceのURLの順番
- * @map 
- */
-const NyanatorMode = {
-  SUMMARIZE: { mode: '要約', msg: '要約だね。\n短くしたい文章を投げかけてみて。', url: 'summarizeurl' },
-  TEXT_TO_IMAGE: { mode: '画像', msg: 'お絵かきして欲しいんだね。\nお題は？', url: 'texttoimageurl' },
-  JP_TRANSLATION: { mode: '和訳', msg: '和訳って面白いよね。\n日本語にしたい文章を投げかけてみて。', url: 'jptranslationurl' },
-  EN_TRANSLATION: { mode: '英訳', msg: '英訳大好き。\n英語にしたい文章を投げかけてみて。', url: 'entranslationurl' },
-  CHATBOT: { mode: '会話', msg: '僕が話し相手になってあげる。', url: 'chatboturl' },
-};
-
 /**
 * Nyanator メインクラス
 */
 class Nyanator {
+  /** 
+  * Nyanatorのモードを表すテーブル。モード名。ユーザーに対する返信。HuggingFaceのURLの順番
+  */
+  static get Mode() {
+    return {
+    SUMMARIZE:      { mode: '要約', msg: '要約だね。\n短くしたい文章を投げかけてみて。', url: 'summarizeurl' },
+    TEXT_TO_IMAGE:  { mode: '画像', msg: 'お絵かきして欲しいんだね。\nお題は？', url: 'texttoimageurl' },
+    JP_TRANSLATION: { mode: '和訳', msg: '和訳って面白いよね。\n日本語にしたい文章を投げかけてみて。', url: 'jptranslationurl' },
+    EN_TRANSLATION: { mode: '英訳', msg: '英訳大好き。\n英語にしたい文章を投げかけてみて。', url: 'entranslationurl' },
+    CHATBOT:        { mode: '会話', msg: '僕が話し相手になってあげる。', url: 'chatboturl' },   
+    }
+  }
 
   /**
   * コンストラクタ
   */
   constructor() {
-    this.mode = NyanatorMode.CHATBOT.mode;
-    this.errorDescription = "";
-  };
+    // GASが現状ES2022で動作しておらず他言語でいうところのprivateフィールドが簡潔な記述で実現できない
+    // getterしかないのでイミュータブルにできる
+    Object.defineProperties(this, {
+      /** 
+      * Nyanatorのメッセージ
+      */
+      Messages:  { get() {
+        return {
+          BUSY: 'ぐるぐる～ってしてるみたい。\nもう少しだけ待ってね。',
+          NSFW_FILTERD: 'ゴメンね。上手く描けないよ。。。\nもしかしてエッチな言葉じゃない？'
+        };
+      }},
+    });
+    this.mode = Nyanator.Mode.CHATBOT.mode;
+    this.errorDescription = '';
+  }
 
   /**
   * Nyanatorがユーザーに対して返信する
@@ -31,7 +44,7 @@ class Nyanator {
 
     //LINE Messaging APIのアクセストークンをスクリプトプロパティから取得 
     const line = new LINE(
-      PropertiesService.getScriptProperties().getProperty("linetoken"),
+      PropertiesService.getScriptProperties().getProperty('linetoken'),
       eventData.replyToken
     );
 
@@ -44,6 +57,7 @@ class Nyanator {
         line.postTextMessage(this.errorDescription);
         return;
       }
+
       // ユーザーからのメッセージを検査
       const userMessage = eventData.message.text;
       const userId = eventData.source.userId;
@@ -54,17 +68,18 @@ class Nyanator {
         return;
       }
 
+      // メッセージテーブルから該当するモードのURLを検索
       let huggingFaceUrl = '';
       const mode = this.mode;
-      Object.keys(NyanatorMode).forEach(function (key) {
-        if (NyanatorMode[key].mode == mode) {
-          huggingFaceUrl = NyanatorMode[key].url;
+      Object.keys(Nyanator.Mode).forEach(function (key) {
+        if (Nyanator.Mode[key].mode == mode) {
+          huggingFaceUrl = Nyanator.Mode[key].url;
         }
       });
 
       //Hugging Face APIのURLをスクリプトプロパティから取得
       const huggingFaceSpace = new HuggingFace(PropertiesService.getScriptProperties().getProperty(huggingFaceUrl));
-
+      huggingFaceSpace
       // Hugging FaceにTextDataを送信
       const resultText = this.postTextDataToHuggingFaceAPI(userMessage, huggingFaceSpace);
       if (this.errorDescription) {
@@ -73,7 +88,7 @@ class Nyanator {
       }
 
       // Text to Image以外
-      if (this.mode != NyanatorMode.TEXT_TO_IMAGE.mode) {
+      if (this.mode != Nyanator.Mode.TEXT_TO_IMAGE.mode) {
         line.postTextMessage(resultText);
         return;
       }
@@ -81,9 +96,9 @@ class Nyanator {
       // Text to Image
       //Dropboxのアクセストークンは4時間で期限切れを起こすのでリフレッシュトークンから再取得
       const dropbox = new Dropbox(
-        PropertiesService.getScriptProperties().getProperty("dropboxrefreshtoken"),
-        PropertiesService.getScriptProperties().getProperty("dropboxappkey"),
-        PropertiesService.getScriptProperties().getProperty("dropboxclientsecret")
+        PropertiesService.getScriptProperties().getProperty('dropboxrefreshtoken'),
+        PropertiesService.getScriptProperties().getProperty('dropboxappkey'),
+        PropertiesService.getScriptProperties().getProperty('dropboxclientsecret')
       );
       //Base64符号化された画像をDropboxに送信、画像の公開URLを取得
       const generatedFileUrl = this.putBase64JpegFileToDropBox(userMessage, resultText, dropbox);
@@ -100,7 +115,7 @@ class Nyanator {
     } finally {
       lock.releaseLock();
     }
-  };
+  }
 
   /**
   * Nyanatorに対してロックを掛ける
@@ -109,11 +124,11 @@ class Nyanator {
   */
   tryLock(lock) {
     if (!lock.tryLock(500)) {
-      this.errorDescription = NyanatorMessage.BUSY.description;
+      this.errorDescription = this.Messages.BUSY;
       return false;
     }
     return true;
-  };
+  }
 
   /**
   * ユーザーからのメッセージを確認して応答すべきか判断
@@ -124,9 +139,10 @@ class Nyanator {
   checkUserMessage(userId, userMessage) {
 
     let resultMessage = '';
-    Object.keys(NyanatorMode).forEach(function (key) {
-      if (NyanatorMode[key].mode == userMessage) {
-        resultMessage = NyanatorMode[key].msg;
+    // メッセージテーブルから該当するモードの返信を検索
+    Object.keys(Nyanator.Mode).forEach(function (key) {
+      if (Nyanator.Mode[key].mode == userMessage) {
+        resultMessage = Nyanator.Mode[key].msg;
       }
     });
 
@@ -145,7 +161,7 @@ class Nyanator {
       }
     }
     return resultMessage;
-  };
+  }
 
   /**
   * 文字列データをHuggingFaceで公開したAPIに送信
@@ -157,21 +173,21 @@ class Nyanator {
     //Hugging Face APIにリクエスト
     let resultText = '';
     try {
-      console.info("postTextDataToHuggingFaceAPI textData " + textData);
+      console.info(`postTextDataToHuggingFaceAPI textData ${textData}`);
       const response = huggingFace.postJsonData(textData);
       const code = response.getResponseCode();
-      console.info("postTextDataToHuggingFaceAPI response code " + code);
+      console.info(`postTextDataToHuggingFaceAPI response code ${code}`);
       if (code === 200) {
         const apiResult = response.getContentText();
         resultText = JSON.parse(apiResult).data[0];
 
-        if (this.mode == NyanatorMode.TEXT_TO_IMAGE.mode) {
+        if (this.mode == Nyanator.Mode.TEXT_TO_IMAGE.mode) {
           //data:image/jpeg;base64,データの書式で応答が来るが符号化に適さないため、データ部分だけを抜き出す
-          resultText = resultText.replace("data:image/jpeg;base64,", "");
-          if (!resultText || resultText == GASUtil.base64BlackedoutImage()) {
-            this.errorDescription = NyanatorMessage.NSFW_FILTERD.description;
+          resultText = resultText.replace('data:image/jpeg;base64,', '');
+          if (!resultText || resultText == GASUtil.base64BlackedoutImage) {
+            this.errorDescription = this.Messages.NSFW_FILTERD;
           }
-          console.info("postTextDataToHuggingFaceAPI resultText " + resultText);
+          console.info(`postTextDataToHuggingFaceAPI resultText ${resultText}`);
           return resultText;
         }
       }
@@ -182,12 +198,12 @@ class Nyanator {
     }
 
     if (!resultText) {
-      this.errorDescription = NyanatorMessage.BUSY.description;
+      this.errorDescription = this.Messages.BUSY;
     }
 
-    console.info("postTextDataToHuggingFaceAPI resultText " + resultText);
+    console.info(`postTextDataToHuggingFaceAPI resultText ${resultText}`);
     return resultText;
-  };
+  }
 
   /**
   * Base64符号化された画像をJpeg画像に変換してDropBoxに保存。
@@ -197,13 +213,19 @@ class Nyanator {
   * @return {string} 書き出したJpgeファイルの公開URL
   */
   putBase64JpegFileToDropBox(filePrefix, data, dropbox) {
+
+    if (!dropbox.apiToken) {
+      this.errorDescription = this.Messages.BUSY;
+      return '';
+    }
+
     //保存ファイル設定
-    const fileName = filePrefix + '.jpeg';
+    const fileName = `${filePrefix}.${FileNameExtension.JPEG}`;
     //Base64をデコード
     const decoded = Utilities.base64Decode(data);
     //ファイルを作成
-    const blob = Utilities.newBlob(decoded, 'image/jpeg', fileName);
-    const dropboxFileName = "/Nyanator_GeneratedFiles/" + fileName;
+    const blob = Utilities.newBlob(decoded, MediaType.IMAGE_JPEG, fileName);
+    const dropboxFileName = `/Nyanator_GeneratedFiles/${fileName}`;
 
     //DropBox APIにアップロードリクエスト
     try {
@@ -211,6 +233,8 @@ class Nyanator {
       GASUtil.parseResponse(response, 'uploadFile');
     } catch (e) {
       GASUtil.putConsoleError(e);
+      this.errorDescription = this.Messages.BUSY;
+      return '';
     }
 
     //アップロードした画像の共有設定
@@ -219,6 +243,8 @@ class Nyanator {
       GASUtil.parseResponse(response, 'create_shared_link_settings');
     } catch (e) {
       GASUtil.putConsoleError(e);
+      this.errorDescription = this.Messages.BUSY;
+      return '';
     }
 
     //共有設定したファイルの公開URLを生成
@@ -230,19 +256,21 @@ class Nyanator {
 
       // 文字列置換でDropboxの公開URLに変換
       generatedFileUrl = data.links[0].url.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace('?dl=0', '');
-      console.log("generatedFileUrl " + generatedFileUrl);
+      console.info(`generatedFileUrl ${generatedFileUrl}`);
 
     } catch (e) {
       GASUtil.putConsoleError(e);
+      this.errorDescription = this.Messages.BUSY;
+      return '';
     }
 
     if (!generatedFileUrl) {
-      this.errorDescription = NyanatorMessage.BUSY.description;
+      this.errorDescription = this.Messages.BUSY;
     }
 
     return generatedFileUrl;
 
-  };
+  }
 
   /**
   * Nyantorのモードスクリプトプロパティのキーを取得
@@ -250,15 +278,7 @@ class Nyanator {
   * @return {string} 書き出したJpgeファイルの公開URL
   */
   static modePropertyKey(userId) {
-    return "nyanatormode" + userId;
-  };
-};
+    return `nyanatormode${userId}`
+  }
+}
 
-/** 
- * Nyanatorのメッセージを表すenum
- * @enum {Symbol} 
- */
-const NyanatorMessage = Object.freeze({
-  BUSY: Symbol('ぐるぐる～ってしてるみたい。\nもう少しだけ待ってね。'),
-  NSFW_FILTERD: Symbol('ゴメンね。上手く描けないよ。。。\nもしかしてエッチな言葉じゃない？')
-});

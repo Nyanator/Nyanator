@@ -8,39 +8,33 @@ class HuggingFace {
   * @param {string} apiUrl - Hugging Face APIのURL
   */
   constructor(apiUrl) {
-    const _apiUrl = apiUrl;
-
+    // GASが現状ES2022で動作しておらず他言語でいうところのprivateフィールドが簡潔な記述で実現できない
+    // getterしかないのでイミュータブルにできる
     Object.defineProperties(this, {
-      apiUrl: {
-        get: function () {
-          return _apiUrl;
-        }
-      },
+      apiUrl: { get() { return apiUrl; } },
     });
-  };
+  }
 
   /**
   * HuggingFace APIにPOSTでJSONデータを送る
   * @param {string} data - POSTしたいdata
-  * @return {ApiResponse} APIの応答
+  * @return {HTTPResponse} APIの応答
   */
   postJsonData(data) {
     //APIリクエスト時にセットするペイロード値を設定
     const payload = {
-      'data': [
-        data
-      ]
+      data: [data]
     };
 
     //HTTPSのPOST時のオプションパラメータを設定
     const options = {
-      'payload': JSON.stringify(payload),
-      'myamethod': 'POST',
-      'contentType': 'application/json'
+      payload: JSON.stringify(payload),
+      method: HttpMethod.POST,
+      contentType: MediaType.APPLICATION_JSON
     };
 
-    console.info("apiUrl " + this.apiUrl);
+    console.info(`apiUrl ${this.apiUrl}`);
     // Hugging Face APIへリクエスト
     return UrlFetchApp.fetch(this.apiUrl, options);
-  };
-};
+  }
+}
