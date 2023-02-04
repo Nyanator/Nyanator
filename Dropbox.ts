@@ -3,7 +3,6 @@
  */
 class Dropbox {
   // TypeScriptではprivateフィールドが書ける
-  // これはGASがES2022で動作していないから
   private readonly CONTENT_URL = "https://content.dropboxapi.com/2/";
   private readonly API_URL = "https://api.dropboxapi.com/2/";
   private readonly OAUTH_URL = "https://api.dropbox.com/oauth2/token";

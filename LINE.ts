@@ -3,7 +3,6 @@
  */
 class LINE {
   // TypeScriptではprivateフィールドが書ける
-  // これはGASがES2022で動作していないから
   private apiToken = "";
   private replyToken = "";
   private readonly REPLY_URL = "https://api.line.me/v2/bot/message/reply";
