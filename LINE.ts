@@ -1,3 +1,4 @@
+import { GASUtil } from "./GASUtil";
 import { Authorization } from "./HttpUtil";
 import { HttpMethod } from "./HttpUtil";
 import { MediaType } from "./HttpUtil";
@@ -75,6 +76,12 @@ export class LINE {
   postJsonRequest(
     param: GoogleAppsScript.URL_Fetch.Payload
   ): GoogleAppsScript.URL_Fetch.HTTPResponse | undefined {
+
+    const isTesst = GASUtil.isTest;
+    if (!isTesst && !this.replyToken) {
+      return undefined;
+    }
+
     //HTTPのPOST時のオプションパラメータを設定
     const options = {
       payload: JSON.stringify(param),

@@ -26,7 +26,7 @@ export class HuggingFace {
       data: [data],
     };
 
-    //HTTPSのPOST時のオプションパラメータを設定
+    //HTTPのPOST時のオプションパラメータを設定
     const options = {
       payload: JSON.stringify(payload),
       method: HttpMethod.POST,

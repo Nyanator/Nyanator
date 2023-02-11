@@ -3,12 +3,7 @@ import { GASUtil } from "./GASUtil";
 import { MediaType, FileNameExtension } from "./HttpUtil";
 import { HuggingFace } from "./HuggingFace";
 import { LINE } from "./LINE";
-import {
-  MODE,
-  MESSAGES,
-  HuggingFace_APIResponse,
-  Dropbox_list_shared_links_Ressponse,
-} from "./NyanatorTypes";
+import { MODE, MESSAGES, HuggingFace_APIResponse, Dropbox_list_shared_links_Ressponse } from "./NyanatorTypes";
 
 /**
  * Nyanator メインクラス
