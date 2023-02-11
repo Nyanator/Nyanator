@@ -9,7 +9,8 @@ exports.Nyanator = void 0;
 //import { MediaType, FileNameExtension } from "./HttpUtil";
 //import { HuggingFace } from "./HuggingFace";
 //import { LINE } from "./LINE";
-//import { MODE, MESSAGES, HuggingFace_APIResponse, Dropbox_list_shared_links_Ressponse } from "./NyanatorTypes";
+//import { MODE, MESSAGES, HuggingFace_APIResponse, Dropbox_list_shared_links_Ressponse, OpenAI_APIResponse, } from "./NyanatorTypes";
+//import { OpenAI } from "./OpenAI";
 /**
  * Nyanator メインクラス
  */
@@ -72,7 +73,7 @@ class Nyanator {
      * @param replyToken   - 返信用トークン
      */
     reply(userMessage, userId, replyToken) {
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c, _d, _e, _f;
         //LINE Messaging APIのアクセストークンをスクリプトプロパティから取得
         const line = new LINE((_a = PropertiesService.getScriptProperties().getProperty("linetoken")) !== null && _a !== void 0 ? _a : "", replyToken);
         // Nyanatorが利用する各種APIはすべてクラウド上であるため、応答が正常に受け取れない場合がある。
@@ -99,10 +100,19 @@ class Nyanator {
                     huggingFaceUrl = Nyanator.Mode[key].url;
                 }
             });
-            //Hugging Face APIのURLをスクリプトプロパティから取得
-            const huggingFaceSpace = new HuggingFace((_b = PropertiesService.getScriptProperties().getProperty(huggingFaceUrl)) !== null && _b !== void 0 ? _b : "");
-            // Hugging FaceにTextDataを送信
-            const resultText = this.postTextDataToHuggingFaceAPI(userMessage, huggingFaceSpace);
+            let resultText = ";";
+            if (this.mode != Nyanator.Mode.CHATBOT.mode) {
+                //Hugging Face APIのURLをスクリプトプロパティから取得
+                const huggingFaceSpace = new HuggingFace((_b = PropertiesService.getScriptProperties().getProperty(huggingFaceUrl)) !== null && _b !== void 0 ? _b : "");
+                // Hugging FaceにTextDataを送信
+                resultText = this.postTextDataToHuggingFaceAPI(userMessage, huggingFaceSpace);
+            }
+            else {
+                // OpenAI APIのURLをスクリプトプロパティから取得
+                const openAI = new OpenAI((_c = PropertiesService.getScriptProperties().getProperty("herokuurl")) !== null && _c !== void 0 ? _c : "");
+                // OpenAI APIにTextDataを送信
+                resultText = this.postTextDataToOpenAIAPI(userId, userMessage, openAI);
+            }
             if (this.errorDescription) {
                 line.postTextMessage(this.errorDescription);
                 return;
@@ -114,7 +124,7 @@ class Nyanator {
             }
             // Text to Image
             //Dropboxのアクセストークンは4時間で期限切れを起こすのでリフレッシュトークンから再取得
-            const dropbox = new Dropbox((_c = PropertiesService.getScriptProperties().getProperty("dropboxrefreshtoken")) !== null && _c !== void 0 ? _c : "", (_d = PropertiesService.getScriptProperties().getProperty("dropboxappkey")) !== null && _d !== void 0 ? _d : "", (_e = PropertiesService.getScriptProperties().getProperty("dropboxclientsecret")) !== null && _e !== void 0 ? _e : "");
+            const dropbox = new Dropbox((_d = PropertiesService.getScriptProperties().getProperty("dropboxrefreshtoken")) !== null && _d !== void 0 ? _d : "", (_e = PropertiesService.getScriptProperties().getProperty("dropboxappkey")) !== null && _e !== void 0 ? _e : "", (_f = PropertiesService.getScriptProperties().getProperty("dropboxclientsecret")) !== null && _f !== void 0 ? _f : "");
             //Base64符号化された画像をDropboxに送信、画像の公開URLを取得
             const generatedFileUrl = this.putBase64JpegFileToDropBox(userMessage, resultText, dropbox);
             if (this.errorDescription) {
@@ -219,6 +229,41 @@ class Nyanator {
             this._errorDescription = Nyanator.Messages.BUSY;
         }
         console.info(`postTextDataToHuggingFaceAPI resultText ${resultText}`);
+        return resultText;
+    }
+    /**
+     * 文字列データをOpenAIで公開したAPIに送信
+     * @param userId - ユーザーID
+     * @param textData - 送信したい文字列
+     * @param openAI - OpenAI
+     * @return 結果文字列
+     */
+    postTextDataToOpenAIAPI(userId, textData, openAI) {
+        //OpenAI APIにリクエスト
+        let resultText = "";
+        try {
+            console.info(`postTextDataToOpenAIAPI textData ${textData}`);
+            const response = openAI.postJsonData(userId, textData);
+            const code = response.getResponseCode();
+            console.info(`postTextDataToOpenAIAPI response code ${code}`);
+            if (code === 200) {
+                const apiResult = response.getContentText();
+                const openAIResponse = JSON.parse(apiResult);
+                resultText = openAIResponse.reply;
+            }
+        }
+        catch (e) {
+            if (e instanceof Error) {
+                GASUtil.putConsoleError(e);
+            }
+            else {
+                console.error("unexcepted error");
+            }
+        }
+        if (!resultText) {
+            this._errorDescription = Nyanator.Messages.BUSY;
+        }
+        console.info(`postTextDataToOpenAIAPI resultText ${resultText}`);
         return resultText;
     }
     /**
