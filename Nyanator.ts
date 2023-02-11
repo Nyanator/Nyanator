@@ -1,11 +1,23 @@
+import { Dropbox } from "./Dropbox";
+import { GASUtil } from "./GASUtil";
+import { MediaType, FileNameExtension } from "./HttpUtil";
+import { HuggingFace } from "./HuggingFace";
+import { LINE } from "./LINE";
+import {
+  MODE,
+  MESSAGES,
+  HuggingFace_APIResponse,
+  Dropbox_list_shared_links_Ressponse,
+} from "./NyanatorTypes";
+
 /**
  * Nyanator メインクラス
  */
-class Nyanator {
+export class Nyanator {
   /**
    * Nyanatorのモードを表すテーブル。モード名。ユーザーに対する返信。HuggingFaceのURLの順番
    */
-  static get Mode(): Nyanator_MODE {
+  static get Mode(): MODE {
     return {
       SUMMARIZE: {
         mode: "要約",
@@ -35,16 +47,24 @@ class Nyanator {
     };
   }
 
-  private mode = Nyanator.Mode.CHATBOT.mode;
-  private errorDescription = "";
+  get mode(): string {
+    return this._mode;
+  }
+  get errorDescription(): string {
+    return this._errorDescription;
+  }
+  private _mode = Nyanator.Mode.CHATBOT.mode;
+  private _errorDescription = "";
   /**
    * Nyanatorのメッセージ
    */
-  private Messages: Nyanator_MESSAGES = {
-    BUSY: "ぐるぐる～ってしてるみたい。\nもう少しだけ待ってね。",
-    NSFW_FILTERD:
-      "ゴメンね。上手く描けないよ。。。\nもしかしてエッチな言葉じゃない？",
-  };
+  static get Messages(): MESSAGES {
+    return {
+      BUSY: "ぐるぐる～ってしてるみたい。\nもう少しだけ待ってね。",
+      NSFW_FILTERD:
+        "ゴメンね。上手く描けないよ。。。\nもしかしてエッチな言葉じゃない？",
+    };
+  }
 
   /**
    * Nyanatorがユーザーに対して返信する
@@ -150,7 +170,7 @@ class Nyanator {
    */
   tryLock(lock: GoogleAppsScript.Lock.Lock): boolean {
     if (!lock.tryLock(2000)) {
-      this.errorDescription = this.Messages.BUSY;
+      this._errorDescription = Nyanator.Messages.BUSY;
       return false;
     }
     return true;
@@ -172,7 +192,7 @@ class Nyanator {
     });
 
     if (resultMessage) {
-      this.mode = userMessage;
+      this._mode = userMessage;
     }
 
     //GASは状態を保持できないのでスクリプトプロパティに現在のモードを保存
@@ -186,7 +206,7 @@ class Nyanator {
       const propertyValue =
         PropertiesService.getScriptProperties().getProperty(propertyKey);
       if (propertyValue) {
-        this.mode = propertyValue;
+        this._mode = propertyValue;
       }
     }
     return resultMessage;
@@ -194,7 +214,7 @@ class Nyanator {
 
   /**
    * 文字列データをHuggingFaceで公開したAPIに送信
-   * @param textData - 要約したい文字列
+   * @param textData - 送信したい文字列
    * @param huggingFace - HuggingFace
    * @return 結果文字列
    */
@@ -213,14 +233,14 @@ class Nyanator {
         const apiResult = response.getContentText();
         const huggingFaceAPIResponse = JSON.parse(
           apiResult
-        ) as HuggingFaceAPIResponse;
+        ) as HuggingFace_APIResponse;
         resultText = huggingFaceAPIResponse.data[0];
 
         if (this.mode == Nyanator.Mode.TEXT_TO_IMAGE.mode) {
           //data:image/jpeg;base64,データの書式で応答が来るが符号化に適さないため、データ部分だけを抜き出す
           resultText = resultText.replace("data:image/jpeg;base64,", "");
           if (!resultText || resultText == GASUtil.base64BlackedoutImage) {
-            this.errorDescription = this.Messages.NSFW_FILTERD;
+            this._errorDescription = Nyanator.Messages.NSFW_FILTERD;
           }
           console.info(`postTextDataToHuggingFaceAPI resultText ${resultText}`);
           return resultText;
@@ -235,7 +255,7 @@ class Nyanator {
     }
 
     if (!resultText) {
-      this.errorDescription = this.Messages.BUSY;
+      this._errorDescription = Nyanator.Messages.BUSY;
     }
 
     console.info(`postTextDataToHuggingFaceAPI resultText ${resultText}`);
@@ -272,7 +292,7 @@ class Nyanator {
       } else {
         console.error("unexcepted error");
       }
-      this.errorDescription = this.Messages?.BUSY ?? "";
+      this._errorDescription = Nyanator.Messages.BUSY;
       return "";
     }
 
@@ -286,7 +306,7 @@ class Nyanator {
       } else {
         console.error("unexcepted error");
       }
-      this.errorDescription = this.Messages.BUSY;
+      this._errorDescription = Nyanator.Messages.BUSY;
       return "";
     }
 
@@ -297,7 +317,7 @@ class Nyanator {
       const json = GASUtil.parseResponse(response, "list_shared_links");
       const dropboxAPI_list_shared_links_Ressponse = JSON.parse(
         json
-      ) as DropboxAPI_list_shared_links_Ressponse;
+      ) as Dropbox_list_shared_links_Ressponse;
 
       // 文字列置換でDropboxの公開URLに変換
       generatedFileUrl = dropboxAPI_list_shared_links_Ressponse.links[0].url
@@ -310,12 +330,12 @@ class Nyanator {
       } else {
         console.error("unexcepted error");
       }
-      this.errorDescription = this.Messages.BUSY;
+      this._errorDescription = Nyanator.Messages.BUSY;
       return "";
     }
 
     if (!generatedFileUrl) {
-      this.errorDescription = this.Messages.BUSY;
+      this._errorDescription = Nyanator.Messages.BUSY;
     }
 
     return generatedFileUrl;

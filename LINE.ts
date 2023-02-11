@@ -1,7 +1,11 @@
+import { Authorization } from "./HttpUtil";
+import { HttpMethod } from "./HttpUtil";
+import { MediaType } from "./HttpUtil";
+
 /**
  * LINE Messaging APIをGASから呼び出すクラス
  */
-class LINE {
+export class LINE {
   // TypeScriptではprivateフィールドが書ける
   private apiToken = "";
   private replyToken = "";
@@ -71,10 +75,6 @@ class LINE {
   postJsonRequest(
     param: GoogleAppsScript.URL_Fetch.Payload
   ): GoogleAppsScript.URL_Fetch.HTTPResponse | undefined {
-    if (!this.replyToken) {
-      return;
-    }
-
     //HTTPのPOST時のオプションパラメータを設定
     const options = {
       payload: JSON.stringify(param),

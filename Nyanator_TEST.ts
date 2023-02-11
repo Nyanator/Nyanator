@@ -1,7 +1,12 @@
+import { doPost } from "./doPost";
+import { GASUtil } from "./GASUtil";
+import { Nyanator } from "./Nyanator";
+import { LINE_PostData } from "./NyanatorTypes";
+
 /**
  * Nyanator各機能の簡易テスト
  */
-function doPost_Test_All() {
+export function doPost_Test_All() {
   doPost_Test_Transition();
   doPost_Test_Summarize();
   doPost_Test_TextToImage();
@@ -13,7 +18,7 @@ function doPost_Test_All() {
 /**
  * Nyanatorモード遷移のテスト
  */
-function doPost_Test_Transition() {
+export function doPost_Test_Transition() {
   Object.keys(Nyanator.Mode).forEach((key: string) =>
     doPost_Test_StartXXXX(Nyanator.Mode[key].mode, "testuser")
   );
@@ -25,7 +30,7 @@ function doPost_Test_Transition() {
  * @param testUser - テスト用のユーザー
  * @return テストの成否
  */
-function doPost_Test_StartXXXX(
+export function doPost_Test_StartXXXX(
   modeDescription: string,
   testUser: string
 ): boolean {
@@ -33,7 +38,7 @@ function doPost_Test_StartXXXX(
   const propertyKey = Nyanator.modePropertyKey(testUser);
   //実行前にモードを初期化する
   PropertiesService.getScriptProperties().setProperty(propertyKey, "");
-  const postData: LINEPostData = {
+  const postData: LINE_PostData = {
     postData: {
       contents: JSON.stringify({
         events: [
@@ -62,7 +67,7 @@ function doPost_Test_StartXXXX(
 /**
  * Nyanator要約のテスト
  */
-function doPost_Test_Summarize() {
+export function doPost_Test_Summarize() {
   const testUser = "testuser";
   if (doPost_Test_StartXXXX(Nyanator.Mode.SUMMARIZE.mode, testUser)) {
     doPost({
@@ -86,7 +91,7 @@ function doPost_Test_Summarize() {
 /**
  * Nyanator画像生成のテスト
  */
-function doPost_Test_TextToImage() {
+export function doPost_Test_TextToImage() {
   const testUser = "testuser";
   if (doPost_Test_StartXXXX(Nyanator.Mode.TEXT_TO_IMAGE.mode, testUser)) {
     doPost({
@@ -108,7 +113,7 @@ function doPost_Test_TextToImage() {
 /**
  * Nyanator和訳のテスト
  */
-function doPost_Test_JpTranslation() {
+export function doPost_Test_JpTranslation() {
   const testUser = "testuser";
   if (doPost_Test_StartXXXX(Nyanator.Mode.JP_TRANSLATION.mode, testUser)) {
     doPost({
@@ -130,7 +135,7 @@ function doPost_Test_JpTranslation() {
 /**
  * Nyanator英訳のテスト
  */
-function doPost_Test_EnTranslation() {
+export function doPost_Test_EnTranslation() {
   const testUser = "testuser";
   if (doPost_Test_StartXXXX(Nyanator.Mode.EN_TRANSLATION.mode, testUser)) {
     doPost({
@@ -152,7 +157,7 @@ function doPost_Test_EnTranslation() {
 /**
  * Nyanatorチャットボットのテスト
  */
-function doPost_Test_Chatbot() {
+export function doPost_Test_Chatbot() {
   const testUser = "testuser";
   if (doPost_Test_StartXXXX(Nyanator.Mode.CHATBOT.mode, testUser)) {
     doPost({

@@ -2,7 +2,7 @@
  * httpのcontentTypeに指定する定義
  * フレームワークによっては定義されていることもあるようだが、GASにはないので自作
  */
-class MediaType {
+export class MediaType {
   static get APPLICATION_JSON(): string {
     return "application/json";
   }
@@ -18,7 +18,7 @@ class MediaType {
  * httpのmethodに指定する定義
  * フレームワークによっては定義されていることもあるようだが、GASにはないので自作
  */
-class HttpMethod {
+export class HttpMethod {
   static get POST(): GoogleAppsScript.URL_Fetch.HttpMethod {
     return "post";
   }
@@ -40,7 +40,7 @@ class HttpMethod {
  * httpの認証に指定する定義
  * フレームワークによっては定義されていることもあるようだが、GASにはないので自作
  */
-class Authorization {
+export class Authorization {
   /**
    * Bearer文字列の生成
    * @param apiToken - APIのトークン
@@ -63,7 +63,7 @@ class Authorization {
 /**
  * ファイル拡張子
  */
-class FileNameExtension {
+export class FileNameExtension {
   static get JPEG(): string {
     return "jpeg";
   }

@@ -1,7 +1,7 @@
 /**
  * 汎用処理
  */
-class GASUtil {
+export class GASUtil {
   /**
    * コンソールにエラーを出力
    * @param e - エラークラス

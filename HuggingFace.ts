@@ -1,9 +1,10 @@
+import { HttpMethod } from "./HttpUtil";
+import { MediaType } from "./HttpUtil";
 /**
  * Hugging Face APIをGASから呼び出すクラス
  */
-class HuggingFace {
+export class HuggingFace {
   // TypeScriptではprivateフィールドが書ける
-  // これはGASがES2022で動作していないから
   private apiUrl = "";
 
   /**
