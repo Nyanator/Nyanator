@@ -6,6 +6,7 @@ import { GASUtil } from "./GASUtil";
 import { Dropbox } from "./Dropbox";
 import { FileNameExtension } from "./HttpUtil";
 import { MediaType } from "./HttpUtil";
+import { OpenAI } from "./OpenAI";
 require("gas-mock-globals"); // common-js
 
 /**
@@ -236,6 +237,61 @@ describe("Nyanator class", () => {
     expect(returnValue).toEqual(GASUtil.base64BlackedoutImage);
     // NSFWフィルター時、エラー文字列は想定した値か？
     expect(nyanator.errorDescription).toEqual(Nyanator.Messages.NSFW_FILTERD);
+  });
+
+  test("postTextDataToOpenAIAPI条件分岐の確認", () => {
+    const userId = "userId";
+    const textData = "test data";
+    const resultText = "result text";
+    // OpenAIのモックを作成
+    const openAI = new OpenAI("api url");
+    openAI.postJsonData = jest.fn().mockReturnValue({
+      getResponseCode: jest.fn().mockReturnValue(200),
+      getContentText: jest
+        .fn()
+        .mockReturnValue(JSON.stringify({ reply: resultText })),
+    });
+
+    // モードを一度CHATBOTに変更
+    nyanator.checkUserMessage(userId, Nyanator.Mode.CHATBOT.mode);
+
+    let returnValue = nyanator.postTextDataToOpenAIAPI(
+      userId,
+      textData,
+      openAI
+    );
+
+    // postJsonDataに正しい引数を渡しているか
+    expect(openAI.postJsonData).toHaveBeenCalledWith(userId, textData);
+    // httpの応答コードが200のとき、戻り値は想定した値か？
+    expect(returnValue).toEqual(resultText);
+    // httpの応答コードが200のとき、エラー文字列は想定した値か？
+    expect(nyanator.errorDescription).toEqual("");
+
+    // OpenAIのモックを作成
+    openAI.postJsonData = jest.fn().mockReturnValue({
+      getResponseCode: jest.fn().mockReturnValue(500),
+      getContentText: jest
+        .fn()
+        .mockReturnValue(JSON.stringify({ reply: resultText })),
+    });
+
+    returnValue = nyanator.postTextDataToOpenAIAPI(userId, textData, openAI);
+
+    // httpの応答コードが200以外のとき、戻り値は想定した値か？
+    expect(returnValue).toEqual("");
+    // httpの応答コードが200の以外とき、エラー文字列は想定した値か？
+    expect(nyanator.errorDescription).toEqual(Nyanator.Messages.BUSY);
+
+    // OpenAIのモックを作成
+    openAI.postJsonData = jest.fn().mockImplementation(() => {
+      throw new Error();
+    });
+
+    // 例外発生時、戻り値は想定した値か？
+    expect(returnValue).toEqual("");
+    // 例外発生時、エラー文字列は想定した値か？
+    expect(nyanator.errorDescription).toEqual(Nyanator.Messages.BUSY);
   });
 
   test("putBase64JpegFileToDropBox条件分岐の確認", () => {
