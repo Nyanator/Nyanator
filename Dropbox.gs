@@ -1,5 +1,13 @@
 // Compiled using nyanator 1.0.0 (TypeScript 4.9.5)
+var exports = exports || {};
+var module = module || { exports: exports };
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Dropbox = void 0;
+//import { Authorization } from "./HttpUtil";
+//import { GASUtil } from "./GASUtil";
+//import { HttpMethod, MediaType } from "./HttpUtil";
+//import { Dropbox_APIRefreskTokenResponse } from "./NyanatorTypes";
 /**
  * Dropbox APIをGASから呼び出すクラス
  */
@@ -152,3 +160,4 @@ class Dropbox {
         return UrlFetchApp.fetch(this.OAUTH_URL, options);
     }
 }
+exports.Dropbox = Dropbox;

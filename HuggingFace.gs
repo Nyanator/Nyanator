@@ -1,5 +1,11 @@
 // Compiled using nyanator 1.0.0 (TypeScript 4.9.5)
+var exports = exports || {};
+var module = module || { exports: exports };
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.HuggingFace = void 0;
+//import { HttpMethod } from "./HttpUtil";
+//import { MediaType } from "./HttpUtil";
 /**
  * Hugging Face APIをGASから呼び出すクラス
  */
@@ -10,7 +16,6 @@ class HuggingFace {
      */
     constructor(apiUrl) {
         // TypeScriptではprivateフィールドが書ける
-        // これはGASがES2022で動作していないから
         this.apiUrl = "";
         this.apiUrl = apiUrl;
     }
@@ -24,7 +29,7 @@ class HuggingFace {
         const payload = {
             data: [data],
         };
-        //HTTPSのPOST時のオプションパラメータを設定
+        //HTTPのPOST時のオプションパラメータを設定
         const options = {
             payload: JSON.stringify(payload),
             method: HttpMethod.POST,
@@ -35,3 +40,4 @@ class HuggingFace {
         return UrlFetchApp.fetch(this.apiUrl, options);
     }
 }
+exports.HuggingFace = HuggingFace;

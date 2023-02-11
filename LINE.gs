@@ -1,5 +1,13 @@
 // Compiled using nyanator 1.0.0 (TypeScript 4.9.5)
+var exports = exports || {};
+var module = module || { exports: exports };
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.LINE = void 0;
+//import { GASUtil } from "./GASUtil";
+//import { Authorization } from "./HttpUtil";
+//import { HttpMethod } from "./HttpUtil";
+//import { MediaType } from "./HttpUtil";
 /**
  * LINE Messaging APIをGASから呼び出すクラス
  */
@@ -62,8 +70,9 @@ class LINE {
      * @return APIの応答
      */
     postJsonRequest(param) {
-        if (!this.replyToken) {
-            return;
+        const isTesst = GASUtil.isTest;
+        if (!isTesst && !this.replyToken) {
+            return undefined;
         }
         //HTTPのPOST時のオプションパラメータを設定
         const options = {
@@ -76,3 +85,4 @@ class LINE {
         return UrlFetchApp.fetch(this.REPLY_URL, options);
     }
 }
+exports.LINE = LINE;
