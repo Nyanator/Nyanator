@@ -1,9 +1,12 @@
+import { Authorization } from "./HttpUtil";
+import { GASUtil } from "./GASUtil";
+import { HttpMethod, MediaType } from "./HttpUtil";
+import { Dropbox_APIRefreskTokenResponse } from "./NyanatorTypes";
 /**
  * Dropbox APIをGASから呼び出すクラス
  */
-class Dropbox {
+export class Dropbox {
   // TypeScriptではprivateフィールドが書ける
-  // これはGASがES2022で動作していないから
   private readonly CONTENT_URL = "https://content.dropboxapi.com/2/";
   private readonly API_URL = "https://api.dropboxapi.com/2/";
   private readonly OAUTH_URL = "https://api.dropbox.com/oauth2/token";
@@ -20,7 +23,7 @@ class Dropbox {
     try {
       const response = this.initAccessToken(refreshToken, appKey, clientSecret);
       const json = GASUtil.parseResponse(response, "refreshToken");
-      const data = JSON.parse(json) as DropboxAPIRefreskTokenResponse;
+      const data = JSON.parse(json) as Dropbox_APIRefreskTokenResponse;
       this.apiToken = data.access_token;
     } catch (e) {
       if (e instanceof Error) {

@@ -1,16 +1,16 @@
 /**
  * LINE POSTデータ型
  */
-type LINEPostData = {
+export interface LINE_PostData {
   postData: {
     contents: string;
   };
-};
+}
 
 /**
  * LINE イベントデータ型
  */
-type LINEEvents = {
+export interface LINE_Events {
   events: [
     {
       replyToken: string;
@@ -18,37 +18,40 @@ type LINEEvents = {
       source: { userId: string };
     }
   ];
-};
+}
+
+/**
+ * APIの応答型
+ */
+export interface HuggingFace_APIResponse {
+  data: string[];
+}
+
+/**
+ * OAuth認証の応答型
+ */
+export interface Dropbox_APIRefreskTokenResponse {
+  access_token: string;
+}
+
+/**
+ * API 共有設定の応答型
+ */
+export interface Dropbox_list_shared_links_Ressponse {
+  links: [{ url: string }];
+}
 
 /**
  * Nyanatorのメッセージ型
  */
-type Nyanator_MESSAGES = { BUSY: string; NSFW_FILTERD: string };
+export interface MESSAGES {
+  BUSY: string;
+  NSFW_FILTERD: string;
+}
 
 /**
  * Nyanatorのモードを表すテーブル型。モード名。ユーザーに対する返信。HuggingFaceのURLの順番
  */
-type Nyanator_MODE = {
+export interface MODE {
   [key: string]: { mode: string; msg: string; url: string };
-};
-
-/**
- * HuggingFace APIの応答型
- */
-type HuggingFaceAPIResponse = {
-  data: string[];
-};
-
-/**
- * Dropbox API OAuth認証の応答型
- */
-type DropboxAPIRefreskTokenResponse = {
-  access_token: string;
-};
-
-/**
- * Dropbox API 共有設定の応答型
- */
-type DropboxAPI_list_shared_links_Ressponse = {
-  links: [{ url: string }];
-};
+}

@@ -1,5 +1,9 @@
 // Compiled using nyanator 1.0.0 (TypeScript 4.9.5)
+var exports = exports || {};
+var module = module || { exports: exports };
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.FileNameExtension = exports.Authorization = exports.HttpMethod = exports.MediaType = void 0;
 /**
  * httpのcontentTypeに指定する定義
  * フレームワークによっては定義されていることもあるようだが、GASにはないので自作
@@ -15,6 +19,7 @@ class MediaType {
         return "image/jpeg";
     }
 }
+exports.MediaType = MediaType;
 /**
  * httpのmethodに指定する定義
  * フレームワークによっては定義されていることもあるようだが、GASにはないので自作
@@ -36,6 +41,7 @@ class HttpMethod {
         return "delete";
     }
 }
+exports.HttpMethod = HttpMethod;
 /**
  * httpの認証に指定する定義
  * フレームワークによっては定義されていることもあるようだが、GASにはないので自作
@@ -58,6 +64,7 @@ class Authorization {
         return `Basic ${key}`;
     }
 }
+exports.Authorization = Authorization;
 /**
  * ファイル拡張子
  */
@@ -66,3 +73,4 @@ class FileNameExtension {
         return "jpeg";
     }
 }
+exports.FileNameExtension = FileNameExtension;

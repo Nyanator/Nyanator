@@ -1,9 +1,13 @@
+import { GASUtil } from "./GASUtil";
+import { Authorization } from "./HttpUtil";
+import { HttpMethod } from "./HttpUtil";
+import { MediaType } from "./HttpUtil";
+
 /**
  * LINE Messaging APIをGASから呼び出すクラス
  */
-class LINE {
+export class LINE {
   // TypeScriptではprivateフィールドが書ける
-  // これはGASがES2022で動作していないから
   private apiToken = "";
   private replyToken = "";
   private readonly REPLY_URL = "https://api.line.me/v2/bot/message/reply";
@@ -72,8 +76,10 @@ class LINE {
   postJsonRequest(
     param: GoogleAppsScript.URL_Fetch.Payload
   ): GoogleAppsScript.URL_Fetch.HTTPResponse | undefined {
-    if (!this.replyToken) {
-      return;
+
+    const isTesst = GASUtil.isTest;
+    if (!isTesst && !this.replyToken) {
+      return undefined;
     }
 
     //HTTPのPOST時のオプションパラメータを設定

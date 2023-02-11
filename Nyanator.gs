@@ -1,19 +1,22 @@
 // Compiled using nyanator 1.0.0 (TypeScript 4.9.5)
+var exports = exports || {};
+var module = module || { exports: exports };
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Nyanator = void 0;
+//import { Dropbox } from "./Dropbox";
+//import { GASUtil } from "./GASUtil";
+//import { MediaType, FileNameExtension } from "./HttpUtil";
+//import { HuggingFace } from "./HuggingFace";
+//import { LINE } from "./LINE";
+//import { MODE, MESSAGES, HuggingFace_APIResponse, Dropbox_list_shared_links_Ressponse } from "./NyanatorTypes";
 /**
  * Nyanator メインクラス
  */
 class Nyanator {
     constructor() {
-        this.mode = Nyanator.Mode.CHATBOT.mode;
-        this.errorDescription = "";
-        /**
-         * Nyanatorのメッセージ
-         */
-        this.Messages = {
-            BUSY: "ぐるぐる～ってしてるみたい。\nもう少しだけ待ってね。",
-            NSFW_FILTERD: "ゴメンね。上手く描けないよ。。。\nもしかしてエッチな言葉じゃない？",
-        };
+        this._mode = Nyanator.Mode.CHATBOT.mode;
+        this._errorDescription = "";
     }
     /**
      * Nyanatorのモードを表すテーブル。モード名。ユーザーに対する返信。HuggingFaceのURLの順番
@@ -45,6 +48,21 @@ class Nyanator {
                 msg: "僕が話し相手になってあげる。",
                 url: "chatboturl",
             },
+        };
+    }
+    get mode() {
+        return this._mode;
+    }
+    get errorDescription() {
+        return this._errorDescription;
+    }
+    /**
+     * Nyanatorのメッセージ
+     */
+    static get Messages() {
+        return {
+            BUSY: "ぐるぐる～ってしてるみたい。\nもう少しだけ待ってね。",
+            NSFW_FILTERD: "ゴメンね。上手く描けないよ。。。\nもしかしてエッチな言葉じゃない？",
         };
     }
     /**
@@ -125,7 +143,7 @@ class Nyanator {
      */
     tryLock(lock) {
         if (!lock.tryLock(2000)) {
-            this.errorDescription = this.Messages.BUSY;
+            this._errorDescription = Nyanator.Messages.BUSY;
             return false;
         }
         return true;
@@ -145,7 +163,7 @@ class Nyanator {
             }
         });
         if (resultMessage) {
-            this.mode = userMessage;
+            this._mode = userMessage;
         }
         //GASは状態を保持できないのでスクリプトプロパティに現在のモードを保存
         const propertyKey = Nyanator.modePropertyKey(userId);
@@ -155,14 +173,14 @@ class Nyanator {
         else {
             const propertyValue = PropertiesService.getScriptProperties().getProperty(propertyKey);
             if (propertyValue) {
-                this.mode = propertyValue;
+                this._mode = propertyValue;
             }
         }
         return resultMessage;
     }
     /**
      * 文字列データをHuggingFaceで公開したAPIに送信
-     * @param textData - 要約したい文字列
+     * @param textData - 送信したい文字列
      * @param huggingFace - HuggingFace
      * @return 結果文字列
      */
@@ -182,7 +200,7 @@ class Nyanator {
                     //data:image/jpeg;base64,データの書式で応答が来るが符号化に適さないため、データ部分だけを抜き出す
                     resultText = resultText.replace("data:image/jpeg;base64,", "");
                     if (!resultText || resultText == GASUtil.base64BlackedoutImage) {
-                        this.errorDescription = this.Messages.NSFW_FILTERD;
+                        this._errorDescription = Nyanator.Messages.NSFW_FILTERD;
                     }
                     console.info(`postTextDataToHuggingFaceAPI resultText ${resultText}`);
                     return resultText;
@@ -198,7 +216,7 @@ class Nyanator {
             }
         }
         if (!resultText) {
-            this.errorDescription = this.Messages.BUSY;
+            this._errorDescription = Nyanator.Messages.BUSY;
         }
         console.info(`postTextDataToHuggingFaceAPI resultText ${resultText}`);
         return resultText;
@@ -211,7 +229,6 @@ class Nyanator {
      * @return 書き出したJpgeファイルの公開URL
      */
     putBase64JpegFileToDropBox(filePrefix, data, dropbox) {
-        var _a, _b;
         //保存ファイル設定
         const fileName = `${filePrefix}.${FileNameExtension.JPEG}`;
         //Base64をデコード
@@ -231,7 +248,7 @@ class Nyanator {
             else {
                 console.error("unexcepted error");
             }
-            this.errorDescription = (_b = (_a = this.Messages) === null || _a === void 0 ? void 0 : _a.BUSY) !== null && _b !== void 0 ? _b : "";
+            this._errorDescription = Nyanator.Messages.BUSY;
             return "";
         }
         //アップロードした画像の共有設定
@@ -246,7 +263,7 @@ class Nyanator {
             else {
                 console.error("unexcepted error");
             }
-            this.errorDescription = this.Messages.BUSY;
+            this._errorDescription = Nyanator.Messages.BUSY;
             return "";
         }
         //共有設定したファイルの公開URLを生成
@@ -268,11 +285,11 @@ class Nyanator {
             else {
                 console.error("unexcepted error");
             }
-            this.errorDescription = this.Messages.BUSY;
+            this._errorDescription = Nyanator.Messages.BUSY;
             return "";
         }
         if (!generatedFileUrl) {
-            this.errorDescription = this.Messages.BUSY;
+            this._errorDescription = Nyanator.Messages.BUSY;
         }
         return generatedFileUrl;
     }
@@ -285,3 +302,4 @@ class Nyanator {
         return `nyanatormode${userId}`;
     }
 }
+exports.Nyanator = Nyanator;
