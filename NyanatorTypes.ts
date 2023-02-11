@@ -21,10 +21,17 @@ export interface LINE_Events {
 }
 
 /**
- * APIの応答型
+ * HuggingFace APIの応答型
  */
 export interface HuggingFace_APIResponse {
   data: string[];
+}
+
+/**
+ * OpenAI APIの応答型
+ */
+export interface OpenAI_APIResponse {
+  reply: string;
 }
 
 /**
@@ -35,7 +42,7 @@ export interface Dropbox_APIRefreskTokenResponse {
 }
 
 /**
- * API 共有設定の応答型
+ * Dropbox API 共有設定の応答型
  */
 export interface Dropbox_list_shared_links_Ressponse {
   links: [{ url: string }];

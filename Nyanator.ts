@@ -3,7 +3,8 @@ import { GASUtil } from "./GASUtil";
 import { MediaType, FileNameExtension } from "./HttpUtil";
 import { HuggingFace } from "./HuggingFace";
 import { LINE } from "./LINE";
-import { MODE, MESSAGES, HuggingFace_APIResponse, Dropbox_list_shared_links_Ressponse } from "./NyanatorTypes";
+import { MODE, MESSAGES, HuggingFace_APIResponse, Dropbox_list_shared_links_Ressponse, OpenAI_APIResponse, } from "./NyanatorTypes";
+import { OpenAI } from "./OpenAI";
 
 /**
  * Nyanator メインクラス
@@ -101,16 +102,27 @@ export class Nyanator {
         }
       });
 
-      //Hugging Face APIのURLをスクリプトプロパティから取得
-      const huggingFaceSpace = new HuggingFace(
-        PropertiesService.getScriptProperties().getProperty(huggingFaceUrl) ??
-          ""
-      );
-      // Hugging FaceにTextDataを送信
-      const resultText = this.postTextDataToHuggingFaceAPI(
-        userMessage,
-        huggingFaceSpace
-      );
+      let resultText = ";";
+      if (this.mode != Nyanator.Mode.CHATBOT.mode) {
+        //Hugging Face APIのURLをスクリプトプロパティから取得
+        const huggingFaceSpace = new HuggingFace(
+          PropertiesService.getScriptProperties().getProperty(huggingFaceUrl) ??
+            ""
+        );
+        // Hugging FaceにTextDataを送信
+        resultText = this.postTextDataToHuggingFaceAPI(
+          userMessage,
+          huggingFaceSpace
+        );
+      } else {
+        // OpenAI APIのURLをスクリプトプロパティから取得
+        const openAI = new OpenAI(
+          PropertiesService.getScriptProperties().getProperty("herokuurl") ?? ""
+        );
+        // OpenAI APIにTextDataを送信
+        resultText = this.postTextDataToOpenAIAPI(userId, userMessage, openAI);
+      }
+
       if (this.errorDescription) {
         line.postTextMessage(this.errorDescription);
         return;
@@ -254,6 +266,46 @@ export class Nyanator {
     }
 
     console.info(`postTextDataToHuggingFaceAPI resultText ${resultText}`);
+    return resultText;
+  }
+
+  /**
+   * 文字列データをOpenAIで公開したAPIに送信
+   * @param userId - ユーザーID
+   * @param textData - 送信したい文字列
+   * @param openAI - OpenAI
+   * @return 結果文字列
+   */
+  postTextDataToOpenAIAPI(
+    userId: string,
+    textData: string,
+    openAI: OpenAI
+  ): string {
+    //OpenAI APIにリクエスト
+    let resultText = "";
+    try {
+      console.info(`postTextDataToOpenAIAPI textData ${textData}`);
+      const response = openAI.postJsonData(userId, textData);
+      const code = response.getResponseCode();
+      console.info(`postTextDataToOpenAIAPI response code ${code}`);
+      if (code === 200) {
+        const apiResult = response.getContentText();
+        const openAIResponse = JSON.parse(apiResult) as OpenAI_APIResponse;
+        resultText = openAIResponse.reply;
+      }
+    } catch (e) {
+      if (e instanceof Error) {
+        GASUtil.putConsoleError(e);
+      } else {
+        console.error("unexcepted error");
+      }
+    }
+
+    if (!resultText) {
+      this._errorDescription = Nyanator.Messages.BUSY;
+    }
+
+    console.info(`postTextDataToOpenAIAPI resultText ${resultText}`);
     return resultText;
   }
 
